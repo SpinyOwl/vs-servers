@@ -25,6 +25,13 @@
   }
 
   @if (!loading() && !error()) {
+    <header class="pagination">
+      <div class="count">{{ filtered().length }} server{{ filtered().length === 1 ? '' : 's' }}</div>
+      <button class="btn" (click)="prev()" [disabled]="page() <= 1">Prev</button>
+      <span class="muted">Page {{ page() }} / {{ pages() }}</span>
+      <button class="btn" (click)="next()" [disabled]="page() >= pages()">Next</button>
+    </header>
+
     <div class="tableWrap">
       <table>
         <thead>
@@ -52,12 +59,5 @@
         </tbody>
       </table>
     </div>
-
-    <footer class="pagination">
-      <div class="count">{{ filtered().length }} server{{ filtered().length === 1 ? '' : 's' }}</div>
-      <button class="btn" (click)="prev()" [disabled]="page() <= 1">Prev</button>
-      <span class="muted">Page {{ page() }} / {{ pages() }}</span>
-      <button class="btn" (click)="next()" [disabled]="page() >= pages()">Next</button>
-    </footer>
   }
 </div>
