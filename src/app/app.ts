@@ -70,12 +70,4 @@ export class App implements OnInit {
   }
   prev() { if (this.page() > 1) this.page.set(this.page() - 1); }
   next() { if (this.page() < this.pages()) this.page.set(this.page() + 1); }
-
-  // safe util for templates
-  modPreview(mods?: {id:string;version:string}[]) {
-    const list = Array.isArray(mods) ? mods : [];
-    const first = list.slice(0, 3).map(m => `${m.id} ${m.version}`).join(', ');
-    const more = Math.max(0, list.length - 3);
-    return first + (more ? `, +${more} more` : '') || '—';
-  }
 }

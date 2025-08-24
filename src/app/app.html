@@ -51,7 +51,20 @@
             <tr>
               <td class="server-name">{{ s.serverName || '—' }} <a href="vintagestoryjoin://{{s.serverIP}}"><span
                 class="material-symbols-outlined">open_in_new</span></a></td>
-              <td>{{ modPreview(s.mods) }}</td>
+              <td>
+                <div class="mods">
+                  @if (s.mods?.length) {
+                    @for (m of s.mods; track m.id) {
+                      <span class="mod-chip">
+                      <span class="mod-chip-name">{{ m.id }}</span>
+                      <span class="mod-chip-version">{{ m.version }}</span>
+                    </span>
+                    }
+                  } @else {
+                    —
+                  }
+                </div>
+              </td>
               <td>{{ s.players }} / {{ s.maxPlayers }}</td>
               <td class="game-version"><span class="chip">{{ s.gameVersion || '—' }}</span></td>
             </tr>

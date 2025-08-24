@@ -107,6 +107,35 @@ tbody tr:hover td {
   border: 1px solid #d5e6ff;
 }
 
+.mods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  height: 59px;
+  overflow: auto;
+}
+
+.mod-chip {
+  display: inline-flex;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1;
+  align-self: start;
+}
+
+.mod-chip-name {
+  background: #555;
+  color: #fff;
+  padding: 2px 6px;
+}
+
+.mod-chip-version {
+  background: #2f6fed;
+  color: #fff;
+  padding: 2px 6px;
+}
+
 .game-version {
   width: 130px;
 }
@@ -122,4 +151,5 @@ tbody tr:hover td {
   align-items: center;
   gap: 8px;
   justify-content: space-between;
+  width: 300px;
 }
