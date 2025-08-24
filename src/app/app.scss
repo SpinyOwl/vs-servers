@@ -13,27 +13,28 @@
 
 .toolbar {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr auto;
   gap: 8px;
   margin-bottom: 10px;
 }
 
-.input, .select {
-  padding: 8px 10px;
+.input,
+.select {
+  padding: 4px 6px;
   border: 1px solid #ccd1e1;
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .btn {
-  padding: 8px 12px;
+  padding: 4px 6px;
   border: 1px solid #ccd1e1;
-  border-radius: 8px;
+  border-radius: 4px;
   background: #f7f9ff;
   cursor: pointer;
 }
 
 .btn[disabled] {
-  opacity: .5;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -139,7 +140,6 @@ tbody tr:hover td {
 .game-version {
   width: 130px;
 }
-
 
 .server-name a {
   color: #2f6fed;

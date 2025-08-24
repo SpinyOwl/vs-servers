@@ -1,7 +1,7 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {ServersService, VsServer} from '../services/servers.service';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ServersService, VsServer } from '../services/servers.service';
 
 @Component({
   selector: 'app-root',
@@ -17,12 +17,13 @@ export class App implements OnInit {
   servers = signal<VsServer[]>([]);
   filterName = signal<string>('');
   filterVersion = signal<string>('');
+  filterMod = signal<string>('');
   pageSize = signal<number>(20);
   page = signal<number>(1);
 
   versions = computed(() => {
     const list = this.servers()
-      .map(s => s.gameVersion)
+      .map((s) => s.gameVersion)
       .filter((v): v is string => !!v);
     return Array.from(new Set(list)).sort().reverse();
   });
@@ -30,9 +31,11 @@ export class App implements OnInit {
   filtered = computed(() => {
     const nameQ = this.filterName().trim().toLowerCase();
     const ver = this.filterVersion().trim();
-    return this.servers().filter(s => {
+    const mod = this.filterMod().trim().toLowerCase();
+    return this.servers().filter((s) => {
       const n = (s.serverName ?? '').toLowerCase();
-      return (!nameQ || n.includes(nameQ)) && (!ver || s.gameVersion === ver);
+      const modMatch = s.mods?.some((m) => m.id.toLowerCase().includes(mod)) ?? false;
+      return (!nameQ || n.includes(nameQ)) && (!ver || s.gameVersion === ver) && (!mod || modMatch);
     });
   });
 
@@ -53,15 +56,15 @@ export class App implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     this.api.list$().subscribe({
-      next: data => {
+      next: (data) => {
         this.servers.set(data);
         this.page.set(1);
         this.loading.set(false);
       },
-      error: err => {
+      error: (err) => {
         this.error.set(String(err?.message ?? err));
         this.loading.set(false);
-      }
+      },
     });
   }
 

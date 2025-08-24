@@ -5,7 +5,18 @@
   </header>
 
   <section class="toolbar">
-    <input (ngModelChange)="page.set(1)" [(ngModel)]="filterName" class="input" placeholder="Filter by server name…">
+    <input
+      (ngModelChange)="page.set(1)"
+      [(ngModel)]="filterName"
+      class="input"
+      placeholder="Filter by server name…"
+    />
+    <input
+      (ngModelChange)="page.set(1)"
+      [(ngModel)]="filterMod"
+      class="input"
+      placeholder="Filter by mod id…"
+    />
     <select (ngModelChange)="page.set(1)" [(ngModel)]="filterVersion" class="select">
       <option [ngValue]="''">All versions</option>
       @for (v of versions(); track v) {
@@ -30,7 +41,9 @@
 
   @if (!loading() && !error()) {
     <header class="pagination">
-      <div class="count">{{ filtered().length }} server{{ filtered().length === 1 ? '' : 's' }}</div>
+      <div class="count">
+        {{ filtered().length }} server{{ filtered().length === 1 ? '' : 's' }}
+      </div>
       <button class="btn" (click)="prev()" [disabled]="page() <= 1">Prev</button>
       <span class="muted">Page {{ page() }} / {{ pages() }}</span>
       <button class="btn" (click)="next()" [disabled]="page() >= pages()">Next</button>
@@ -39,13 +52,13 @@
     <div class="tableWrap">
       <table>
         <thead>
-        <tr>
-          <th>Server</th>
-          <th class="description">Description</th>
-          <th>Mods</th>
-          <th>Players</th>
-          <th class="game-version">Game version</th>
-        </tr>
+          <tr>
+            <th>Server</th>
+            <th class="description">Description</th>
+            <th>Mods</th>
+            <th>Players</th>
+            <th class="game-version">Game version</th>
+          </tr>
         </thead>
         <tbody>
           @for (s of paged(); track s.serverIP) {
@@ -70,9 +83,9 @@
                   @if (s.mods?.length) {
                     @for (m of sortedMods(s); track m.id) {
                       <span class="mod-chip">
-                      <span class="mod-chip-name">{{ m.id }}</span>
-                      <span class="mod-chip-version">{{ m.version }}</span>
-                    </span>
+                        <span class="mod-chip-name">{{ m.id }}</span>
+                        <span class="mod-chip-version">{{ m.version }}</span>
+                      </span>
                     }
                   } @else {
                     No mods
