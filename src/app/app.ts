@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ServersService, VsServer } from '../services/servers.service';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {ServersService, VsServer} from '../services/servers.service';
 
 @Component({
   selector: 'app-root',
@@ -45,7 +45,9 @@ export class App implements OnInit {
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
 
-  ngOnInit(): void { this.reload(); }
+  ngOnInit(): void {
+    this.reload();
+  }
 
   reload(): void {
     this.loading.set(true);
@@ -68,6 +70,18 @@ export class App implements OnInit {
     this.pageSize.set(n);
     this.page.set(1);
   }
-  prev() { if (this.page() > 1) this.page.set(this.page() - 1); }
-  next() { if (this.page() < this.pages()) this.page.set(this.page() + 1); }
+
+  prev() {
+    if (this.page() > 1) this.page.set(this.page() - 1);
+  }
+
+  next() {
+    if (this.page() < this.pages()) this.page.set(this.page() + 1);
+  }
+
+  sortedMods(s: VsServer) {
+    return s.mods!.sort((a, b) => {
+      return a.id.localeCompare(b.id);
+    });
+  }
 }

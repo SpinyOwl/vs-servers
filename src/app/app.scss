@@ -111,7 +111,7 @@ tbody tr:hover td {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  height: 59px;
+  height: 62px;
   overflow: auto;
 }
 
@@ -127,13 +127,13 @@ tbody tr:hover td {
 .mod-chip-name {
   background: #555;
   color: #fff;
-  padding: 2px 6px;
+  padding: 3px 6px;
 }
 
 .mod-chip-version {
   background: #2f6fed;
   color: #fff;
-  padding: 2px 6px;
+  padding: 3px 6px;
 }
 
 .game-version {
@@ -154,6 +154,7 @@ tbody tr:hover td {
   min-width: 200px;
   width: 300px;
   max-width: 300px;
+  font-weight: 400;
 }
 
 .description {

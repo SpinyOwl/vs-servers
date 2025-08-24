@@ -39,35 +39,43 @@
     <div class="tableWrap">
       <table>
         <thead>
-          <tr>
-            <th>Server</th>
-            <th class="description">Description</th>
-            <th>Mods</th>
-            <th>Players</th>
-            <th class="game-version">Game version</th>
-          </tr>
+        <tr>
+          <th>Server</th>
+          <th class="description">Description</th>
+          <th>Mods</th>
+          <th>Players</th>
+          <th class="game-version">Game version</th>
+        </tr>
         </thead>
         <tbody>
           @for (s of paged(); track s.serverIP) {
             <tr>
-              <td class="server-name">
-                {{ s.serverName || '—' }}
-                <a href="vintagestoryjoin://{{ s.serverIP }}">
-                  <span class="material-symbols-outlined">open_in_new</span>
-                </a>
+              <td>
+                <div class="server-name">
+                  {{ s.serverName || '—' }}
+                  <a href="vintagestoryjoin://{{ s.serverIP }}">
+                    <span class="material-symbols-outlined">open_in_new</span>
+                  </a>
+                </div>
               </td>
-              <td class="description"><div [innerHTML]="s.gameDescription"></div></td>
+              <td>
+                <div class="description">
+                  @if (s.gameDescription) {
+                    <div [innerHTML]="s.gameDescription"></div>
+                  }
+                </div>
+              </td>
               <td>
                 <div class="mods">
                   @if (s.mods?.length) {
-                    @for (m of s.mods; track m.id) {
+                    @for (m of sortedMods(s); track m.id) {
                       <span class="mod-chip">
                       <span class="mod-chip-name">{{ m.id }}</span>
                       <span class="mod-chip-version">{{ m.version }}</span>
                     </span>
                     }
                   } @else {
-                    —
+                    No mods
                   }
                 </div>
               </td>
