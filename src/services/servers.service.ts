@@ -11,6 +11,11 @@ export interface VsServer {
   serverIP: string;
   mods?: VsMod[];
   gameVersion?: string;
+  players?: number;
+  maxPlayers?: number;
+  hasPassword?: boolean;
+  whitelisted?: boolean;
+  gameDescription?: string;
   // other fields exist but we only need the above for the table
 }
 interface ListResponse {

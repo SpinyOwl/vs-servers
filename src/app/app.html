@@ -31,6 +31,7 @@
         <tr>
           <th>Server</th>
           <th>Mods</th>
+          <th>Players</th>
           <th class="game-version">Game version</th>
         </tr>
         </thead>
@@ -40,6 +41,7 @@
               <td class="server-name">{{ s.serverName || '—' }} <a href="vintagestoryjoin://{{s.serverIP}}"><span
                 class="material-symbols-outlined">open_in_new</span></a></td>
               <td>{{ modPreview(s.mods) }}</td>
+              <td>{{ s.players }} / {{ s.maxPlayers }}</td>
               <td class="game-version"><span class="chip">{{ s.gameVersion || '—' }}</span></td>
             </tr>
           } @empty {
