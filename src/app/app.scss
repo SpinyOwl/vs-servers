@@ -1,5 +1,5 @@
 .wrap {
-  max-width: 1100px;
+  max-width: 1600px;
   margin: 24px auto;
   padding: 0 16px;
 }
@@ -151,5 +151,13 @@ tbody tr:hover td {
   align-items: center;
   gap: 8px;
   justify-content: space-between;
+  min-width: 200px;
   width: 300px;
+  max-width: 300px;
+}
+
+.description {
+  min-width: 200px;
+  width: 400px;
+  max-width: 400px;
 }

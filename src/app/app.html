@@ -39,18 +39,24 @@
     <div class="tableWrap">
       <table>
         <thead>
-        <tr>
-          <th>Server</th>
-          <th>Mods</th>
-          <th>Players</th>
-          <th class="game-version">Game version</th>
-        </tr>
+          <tr>
+            <th>Server</th>
+            <th class="description">Description</th>
+            <th>Mods</th>
+            <th>Players</th>
+            <th class="game-version">Game version</th>
+          </tr>
         </thead>
         <tbody>
           @for (s of paged(); track s.serverIP) {
             <tr>
-              <td class="server-name">{{ s.serverName || '—' }} <a href="vintagestoryjoin://{{s.serverIP}}"><span
-                class="material-symbols-outlined">open_in_new</span></a></td>
+              <td class="server-name">
+                {{ s.serverName || '—' }}
+                <a href="vintagestoryjoin://{{ s.serverIP }}">
+                  <span class="material-symbols-outlined">open_in_new</span>
+                </a>
+              </td>
+              <td class="description"><div [innerHTML]="s.gameDescription"></div></td>
               <td>
                 <div class="mods">
                   @if (s.mods?.length) {
@@ -66,11 +72,13 @@
                 </div>
               </td>
               <td>{{ s.players }} / {{ s.maxPlayers }}</td>
-              <td class="game-version"><span class="chip">{{ s.gameVersion || '—' }}</span></td>
+              <td class="game-version">
+                <span class="chip">{{ s.gameVersion || '—' }}</span>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="4" class="empty">No servers match your filters.</td>
+              <td colspan="5" class="empty">No servers match your filters.</td>
             </tr>
           }
         </tbody>
