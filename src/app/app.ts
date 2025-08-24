@@ -18,6 +18,8 @@ export class App implements OnInit {
   filterName = signal<string>('');
   filterVersion = signal<string>('');
   filterMod = signal<string>('');
+  filterHasPassword = signal<string>('');
+  filterWhitelisted = signal<string>('');
   pageSize = signal<number>(20);
   page = signal<number>(1);
   sortColumn = signal<string>('');
@@ -34,10 +36,20 @@ export class App implements OnInit {
     const nameQ = this.filterName().trim().toLowerCase();
     const ver = this.filterVersion().trim();
     const mod = this.filterMod().trim().toLowerCase();
+    const hasPw = this.filterHasPassword().trim();
+    const wl = this.filterWhitelisted().trim();
     return this.servers().filter((s) => {
       const n = (s.serverName ?? '').toLowerCase();
       const modMatch = s.mods?.some((m) => m.id.toLowerCase().includes(mod)) ?? false;
-      return (!nameQ || n.includes(nameQ)) && (!ver || s.gameVersion === ver) && (!mod || modMatch);
+      const pwMatch = !hasPw || String(s.hasPassword ?? false) === hasPw;
+      const wlMatch = !wl || String(s.whitelisted ?? false) === wl;
+      return (
+        (!nameQ || n.includes(nameQ)) &&
+        (!ver || s.gameVersion === ver) &&
+        (!mod || modMatch) &&
+        pwMatch &&
+        wlMatch
+      );
     });
   });
 

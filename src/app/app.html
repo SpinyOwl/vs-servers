@@ -23,6 +23,16 @@
         <option [ngValue]="v">{{ v }}</option>
       }
     </select>
+    <select (ngModelChange)="page.set(1)" [(ngModel)]="filterHasPassword" class="select">
+      <option [ngValue]="''">All passwords</option>
+      <option [ngValue]="'true'">Has password</option>
+      <option [ngValue]="'false'">No password</option>
+    </select>
+    <select (ngModelChange)="page.set(1)" [(ngModel)]="filterWhitelisted" class="select">
+      <option [ngValue]="''">All access</option>
+      <option [ngValue]="'true'">Whitelisted</option>
+      <option [ngValue]="'false'">Not whitelisted</option>
+    </select>
     <select (ngModelChange)="setPageSize($event)" [ngModel]="pageSize()" class="select">
       <option [ngValue]="10">10 / page</option>
       <option [ngValue]="20">20 / page</option>
@@ -77,6 +87,12 @@
               <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
             }
           </th>
+          <th class="bool-col">
+            <span class="material-symbols-outlined">key_vertical</span>
+          </th>
+          <th class="bool-col">
+            <span class="material-symbols-outlined">list_alt_check</span>
+          </th>
           <th class="game-version" (click)="sortBy('gameVersion')">
             Game version
             @if (sortColumn() === 'gameVersion') {
@@ -118,13 +134,19 @@
                 </div>
               </td>
               <td>{{ s.players }} / {{ s.maxPlayers }}</td>
+              <td class="bool-col">
+                <span class="material-symbols-outlined">{{ s.hasPassword ? 'check' : 'close' }}</span>
+              </td>
+              <td class="bool-col">
+                <span class="material-symbols-outlined">{{ s.whitelisted ? 'check' : 'close' }}</span>
+              </td>
               <td class="game-version">
                 <span class="chip">{{ s.gameVersion || '—' }}</span>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="empty">No servers match your filters.</td>
+              <td colspan="7" class="empty">No servers match your filters.</td>
             </tr>
           }
         </tbody>
