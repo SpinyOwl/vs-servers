@@ -11,13 +11,6 @@
   margin-bottom: 12px;
 }
 
-.toolbar {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
 .input,
 .select {
   padding: 4px 6px;
@@ -55,13 +48,24 @@ table {
 
 thead th {
   text-align: left;
-  padding: 10px;
+  padding: 4px 6px;
   background: #5c4a36;
   border-bottom: 1px solid #6b5a46;
-  position: sticky;
-  top: 0;
-  cursor: pointer;
   user-select: none;
+}
+
+thead tr.filters th {
+  padding: 4px;
+  cursor: default;
+}
+
+thead tr.filters th .input,
+thead tr.filters th .select {
+  width: 100%;
+}
+
+thead tr.columns th {
+  cursor: pointer;
 }
 
 tbody td {
