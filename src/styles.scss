@@ -1,12 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
-
+:root {
+  --background-color: #4b3d2d;
+}
 html {
   color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background-color: #4b3d2d;
+  background-color: var(--background-color);
   color: #fff;
 }
 
