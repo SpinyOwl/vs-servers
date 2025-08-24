@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface VsMod {
   id: string;
@@ -26,10 +27,10 @@ interface ListResponse {
 @Injectable({ providedIn: 'root' })
 export class ServersService {
   private readonly http = inject(HttpClient);
-  private readonly base = '/api'; // dev: proxy -> https://masterserver.vintagestory.at/api/v1
+  private readonly base = environment.apiUrl;
 
   list$(): Observable<VsServer[]> {
-    return this.http.get<ListResponse>(`${this.base}/servers/list`).pipe(
+    return this.http.get<ListResponse>(`${this.base}`).pipe(
       map(res => (res.status === 'ok' && Array.isArray(res.data)) ? res.data : [])
     );
   }
