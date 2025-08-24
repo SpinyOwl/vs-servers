@@ -57,6 +57,8 @@ thead th {
   border-bottom: 1px solid #e6e9f2;
   position: sticky;
   top: 0;
+  cursor: pointer;
+  user-select: none;
 }
 
 tbody td {
@@ -112,8 +114,9 @@ tbody tr:hover td {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  height: 62px;
+  height: 84px;
   overflow: auto;
+  max-width: 400px;
 }
 
 .mod-chip {
@@ -141,6 +144,11 @@ tbody tr:hover td {
   width: 130px;
 }
 
+.sort {
+  font-size: 10px;
+  margin-left: 4px;
+}
+
 .server-name a {
   color: #2f6fed;
   text-decoration: none;
@@ -151,14 +159,12 @@ tbody tr:hover td {
   align-items: center;
   gap: 8px;
   justify-content: space-between;
-  min-width: 200px;
-  width: 300px;
+  min-width: 100px;
   max-width: 300px;
   font-weight: 400;
 }
 
 .description {
   min-width: 200px;
-  width: 400px;
   max-width: 400px;
 }

@@ -20,6 +20,8 @@ export class App implements OnInit {
   filterMod = signal<string>('');
   pageSize = signal<number>(20);
   page = signal<number>(1);
+  sortColumn = signal<string>('');
+  sortAsc = signal<boolean>(true);
 
   versions = computed(() => {
     const list = this.servers()
@@ -39,10 +41,48 @@ export class App implements OnInit {
     });
   });
 
-  pages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.pageSize())));
+  sorted = computed(() => {
+    const col = this.sortColumn();
+    const asc = this.sortAsc();
+    const list = this.filtered().slice();
+    if (col) {
+      list.sort((a, b) => {
+        let av: any;
+        let bv: any;
+        switch (col) {
+          case 'serverName':
+            av = a.serverName || '';
+            bv = b.serverName || '';
+            return av.localeCompare(bv);
+          case 'gameDescription':
+            av = a.gameDescription || '';
+            bv = b.gameDescription || '';
+            return av.localeCompare(bv);
+          case 'mods':
+            av = a.mods?.length || 0;
+            bv = b.mods?.length || 0;
+            return av - bv;
+          case 'players':
+            av = a.players || 0;
+            bv = b.players || 0;
+            return av - bv;
+          case 'gameVersion':
+            av = a.gameVersion || '';
+            bv = b.gameVersion || '';
+            return av.localeCompare(bv);
+          default:
+            return 0;
+        }
+      });
+      if (!asc) list.reverse();
+    }
+    return list;
+  });
+
+  pages = computed(() => Math.max(1, Math.ceil(this.sorted().length / this.pageSize())));
   paged = computed(() => {
     const start = (this.page() - 1) * this.pageSize();
-    return this.filtered().slice(start, start + this.pageSize());
+    return this.sorted().slice(start, start + this.pageSize());
   });
 
   loading = signal<boolean>(false);
@@ -80,6 +120,15 @@ export class App implements OnInit {
 
   next() {
     if (this.page() < this.pages()) this.page.set(this.page() + 1);
+  }
+
+  sortBy(col: string) {
+    if (this.sortColumn() === col) {
+      this.sortAsc.set(!this.sortAsc());
+    } else {
+      this.sortColumn.set(col);
+      this.sortAsc.set(true);
+    }
   }
 
   sortedMods(s: VsServer) {
