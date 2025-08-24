@@ -1,0 +1,11 @@
+{
+  "/api": {
+    "target": "https://masterserver.vintagestory.at",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": "/api/v1"
+    },
+    "logLevel": "debug"
+  }
+}
