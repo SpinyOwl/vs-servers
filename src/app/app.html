@@ -1,13 +1,14 @@
 <div class="wrap">
   <header class="header">
     <h1>Vintage Story — Public Servers</h1>
-    <button class="btn" (click)="reload()">Reload</button>
+    <button (click)="reload()" class="btn">Reload</button>
   </header>
 
   <section class="toolbar">
-    <input class="input" placeholder="Filter by server name…" [(ngModel)]="filterName" (ngModelChange)="page.set(1)">
-    <input class="input" placeholder="Filter by game version…" [(ngModel)]="filterVersion" (ngModelChange)="page.set(1)">
-    <select class="select" [ngModel]="pageSize()" (ngModelChange)="setPageSize($event)">
+    <input (ngModelChange)="page.set(1)" [(ngModel)]="filterName" class="input" placeholder="Filter by server name…">
+    <input (ngModelChange)="page.set(1)" [(ngModel)]="filterVersion" class="input"
+           placeholder="Filter by game version…">
+    <select (ngModelChange)="setPageSize($event)" [ngModel]="pageSize()" class="select">
       <option [ngValue]="10">10 / page</option>
       <option [ngValue]="20">20 / page</option>
       <option [ngValue]="50">50 / page</option>
@@ -28,19 +29,18 @@
       <table>
         <thead>
         <tr>
-          <th>Server name</th>
-          <th>Server IP</th>
+          <th>Server</th>
           <th>Mods</th>
-          <th>Game version</th>
+          <th class="game-version">Game version</th>
         </tr>
         </thead>
         <tbody>
           @for (s of paged(); track s.serverIP) {
             <tr>
-              <td>{{ s.serverName || '—' }}</td>
-              <td><code>{{ s.serverIP || '—' }}</code></td>
+              <td class="server-name">{{ s.serverName || '—' }} <a href="vintagestoryjoin://{{s.serverIP}}"><span
+                class="material-symbols-outlined">open_in_new</span></a></td>
               <td>{{ modPreview(s.mods) }}</td>
-              <td><span class="chip">{{ s.gameVersion || '—' }}</span></td>
+              <td class="game-version"><span class="chip">{{ s.gameVersion || '—' }}</span></td>
             </tr>
           } @empty {
             <tr>
