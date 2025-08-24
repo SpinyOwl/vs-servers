@@ -6,8 +6,12 @@
 
   <section class="toolbar">
     <input (ngModelChange)="page.set(1)" [(ngModel)]="filterName" class="input" placeholder="Filter by server name…">
-    <input (ngModelChange)="page.set(1)" [(ngModel)]="filterVersion" class="input"
-           placeholder="Filter by game version…">
+    <select (ngModelChange)="page.set(1)" [(ngModel)]="filterVersion" class="select">
+      <option [ngValue]="''">All versions</option>
+      @for (v of versions(); track v) {
+        <option [ngValue]="v">{{ v }}</option>
+      }
+    </select>
     <select (ngModelChange)="setPageSize($event)" [ngModel]="pageSize()" class="select">
       <option [ngValue]="10">10 / page</option>
       <option [ngValue]="20">20 / page</option>

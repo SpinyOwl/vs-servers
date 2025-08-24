@@ -20,13 +20,19 @@ export class App implements OnInit {
   pageSize = signal<number>(20);
   page = signal<number>(1);
 
+  versions = computed(() => {
+    const list = this.servers()
+      .map(s => s.gameVersion)
+      .filter((v): v is string => !!v);
+    return Array.from(new Set(list)).sort().reverse();
+  });
+
   filtered = computed(() => {
     const nameQ = this.filterName().trim().toLowerCase();
-    const verQ  = this.filterVersion().trim().toLowerCase();
+    const ver = this.filterVersion().trim();
     return this.servers().filter(s => {
       const n = (s.serverName ?? '').toLowerCase();
-      const v = (s.gameVersion ?? '').toLowerCase();
-      return (!nameQ || n.includes(nameQ)) && (!verQ || v.includes(verQ));
+      return (!nameQ || n.includes(nameQ)) && (!ver || s.gameVersion === ver);
     });
   });
 
