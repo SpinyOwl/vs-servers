@@ -21,15 +21,18 @@
 .input,
 .select {
   padding: 4px 6px;
-  border: 1px solid #ccd1e1;
+  border: 1px solid #6b5a46;
   border-radius: 4px;
+  background: #3e3327;
+  color: #fff;
 }
 
 .btn {
   padding: 4px 6px;
-  border: 1px solid #ccd1e1;
+  border: 1px solid #6b5a46;
   border-radius: 4px;
-  background: #f7f9ff;
+  background: #5c4a36;
+  color: #fff;
   cursor: pointer;
 }
 
@@ -40,7 +43,7 @@
 
 .tableWrap {
   overflow: auto;
-  border: 1px solid #e6e9f2;
+  border: 1px solid #6b5a46;
   border-radius: 10px;
 }
 
@@ -53,8 +56,8 @@ table {
 thead th {
   text-align: left;
   padding: 10px;
-  background: #f3f6ff;
-  border-bottom: 1px solid #e6e9f2;
+  background: #5c4a36;
+  border-bottom: 1px solid #6b5a46;
   position: sticky;
   top: 0;
   cursor: pointer;
@@ -63,12 +66,12 @@ thead th {
 
 tbody td {
   padding: 10px;
-  border-bottom: 1px solid #f0f2f8;
+  border-bottom: 1px solid #6b5a46;
   vertical-align: top;
 }
 
 tbody tr:hover td {
-  background: #fafcff;
+  background: #61503f;
 }
 
 .empty {
@@ -106,8 +109,9 @@ tbody tr:hover td {
 .chip {
   padding: 2px 8px;
   border-radius: 999px;
-  background: #eef6ff;
-  border: 1px solid #d5e6ff;
+  background: #5c4a36;
+  border: 1px solid #6b5a46;
+  color: #fff;
 }
 
 .mods {
@@ -129,13 +133,13 @@ tbody tr:hover td {
 }
 
 .mod-chip-name {
-  background: #555;
+  background: #373737;
   color: #fff;
   padding: 3px 6px;
 }
 
 .mod-chip-version {
-  background: #2f6fed;
+  background: #1143a1;
   color: #fff;
   padding: 3px 6px;
 }
@@ -150,7 +154,7 @@ tbody tr:hover td {
 }
 
 .server-name a {
-  color: #2f6fed;
+  color: #83a7ea;
   text-decoration: none;
 }
 
