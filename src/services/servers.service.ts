@@ -30,7 +30,7 @@ export class ServersService {
   private readonly base = environment.apiUrl;
 
   list$(): Observable<VsServer[]> {
-    return this.http.get<ListResponse>(`${this.base}`).pipe(
+    return this.http.get<ListResponse>(`${this.base}/s/servers/list`).pipe(
       map(res => (res.status === 'ok' && Array.isArray(res.data)) ? res.data : [])
     );
   }
