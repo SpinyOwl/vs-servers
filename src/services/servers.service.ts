@@ -42,17 +42,6 @@ export class ServersService {
     return this.fetchServers();
   }
 
-  getPage(pageSize: number, pageIndex: number): Observable<VsServer[]> {
-    const size = Math.max(1, Math.floor(Number(pageSize) || 0));
-    const index = Math.max(0, Math.floor(Number(pageIndex) || 0));
-    return this.serversSubject.asObservable().pipe(
-      map(() => {
-        const start = index * size;
-        return this.servers.slice(start, start + size);
-      })
-    );
-  }
-
   private startAutoRefresh(): void {
     timer(0, this.refreshIntervalMs)
       .pipe(
