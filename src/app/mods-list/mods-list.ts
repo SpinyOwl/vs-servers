@@ -57,7 +57,11 @@ export class ModsList {
   }
 
   modUrl(modid: string) {
-    return `https://mods.vintagestory.at/show/mod/${modid}`;
+    const assetId = this.getInfo(modid)?.assetId;
+    if (assetId != null) {
+      return `https://mods.vintagestory.at/show/mod/${assetId}`;
+    }
+    return '#';
   }
 
   logoUrl(info: VsModInfo): string | undefined {
