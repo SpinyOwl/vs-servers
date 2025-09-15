@@ -42,3 +42,30 @@ th, h1 {
 header {
   font-weight: 600;
 }
+
+
+
+.btn {
+  padding: 6px 10px;
+  border: 1px solid #8a7c6b;
+  background: #5c4a36;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.2s ease-in-out,
+    transform 0.2s;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.btn:hover {
+  background: #8a725c;
+  text-decoration: none;
+}
+
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

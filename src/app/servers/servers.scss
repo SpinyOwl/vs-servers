@@ -7,19 +7,6 @@
   color: #fff;
 }
 
-.btn {
-  padding: 4px 6px;
-  border: 1px solid #6b5a46;
-  border-radius: 4px;
-  background: #5c4a36;
-  color: #fff;
-  cursor: pointer;
-}
-
-.btn[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .actions {
   margin-bottom: 12px;
@@ -29,6 +16,7 @@
   overflow: auto;
   border: 1px solid #6b5a46;
   border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 table {
