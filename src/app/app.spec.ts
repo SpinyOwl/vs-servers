@@ -1,5 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { App } from './app';
 import { Servers } from './servers/servers';
@@ -11,7 +12,7 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: ServersService, useValue: { list$: () => of([]) } },
+        provideRouter([]),
       ],
     }).compileComponents();
   });

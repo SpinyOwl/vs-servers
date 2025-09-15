@@ -1,7 +1,9 @@
 import {Routes} from '@angular/router';
-import {App} from './app';
+import {Servers} from './servers/servers';
+import {Feedback} from './feedback/feedback';
 
 export const routes: Routes = [
-  {path: '', component: App},
+  {path: '', component: Servers},
+  {path: 'feedback', component: Feedback},
   {path: '**', redirectTo: ''}
 ];

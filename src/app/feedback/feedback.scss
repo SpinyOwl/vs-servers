@@ -1,0 +1,51 @@
+.feedback-container {
+  width: 100%;
+  font-size: 14px;
+}
+form {
+  width: 600px;
+  margin: 0 auto;
+}
+label {
+  display: inline-block;
+}
+
+input, textarea, button {
+  display: inline-block;
+}
+
+em {
+  color: red;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex-grow: 1;
+  flex-shrink: 1;
+  margin: 4px auto;
+  gap: 16px;
+}
+.name-input {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.name-input label {
+  opacity: 0.5;
+}
+
+.section-label {
+  margin-top: 16px;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+
