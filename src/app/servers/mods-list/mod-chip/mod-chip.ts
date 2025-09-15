@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 
-import {VsMod} from '../../services/servers.service';
+import {VsMod} from '../../../../services/servers.service';
 
 @Component({
   selector: 'app-mod-chip',

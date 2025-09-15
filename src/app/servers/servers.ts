@@ -2,7 +2,7 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ServersService, VsMod, VsServer} from '../../services/servers.service';
-import {ModsList} from '../mods-list/mods-list';
+import {ModsList} from './mods-list/mods-list';
 import {ModsService, VsModInfo} from '../../services/mods.service';
 
 @Component({

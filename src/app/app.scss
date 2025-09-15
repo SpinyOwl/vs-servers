@@ -1,6 +1,17 @@
-.wrap {
+:host {
   max-width: 1800px;
-  margin: 24px auto;
-  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100vh;
+  margin: 0 auto;
 }
 
+.page-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  padding-top: 1rem;
+}

@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { VsMod } from '../../services/servers.service';
-import { ModChip } from '../mod-chip/mod-chip';
+import { VsMod } from '../../../services/servers.service';
+import { ModChip } from './mod-chip/mod-chip';
 
 @Component({
   selector: 'app-mods-list',
