@@ -1,29 +1,7 @@
-<div class="mods" (scroll)="updateTooltipPosition()">
+<div class="mods" (scroll)="onScroll()">
   @if (mods?.length) {
     @for (m of sortedMods(); track m.id) {
-      <a
-        class="mod-chip"
-        [href]="modUrl(m.id)"
-        target="_blank"
-        rel="noopener noreferrer"
-        (mouseenter)="loadModInfo(m.id); onChipEnter($event)"
-        (mouseleave)="onChipLeave()"
-      >
-        <span class="mod-chip-name">{{ m.id }}</span>
-        <span class="mod-chip-version">{{ m.version }}</span>
-        <div class="mod-tooltip">
-          @if (getInfo(m.id); as info) {
-            @if (logoUrl(info); as logo) {
-              <img class="mod-tooltip-logo" [src]="logo" alt="" />
-            }
-            <div class="mod-tooltip-name">{{ info.name || m.id }}</div>
-            <div class="mod-tooltip-description" [innerHTML]="info.text"></div>
-          } @else {
-            <div class="mod-tooltip-name">{{ m.id }}</div>
-            <div class="mod-tooltip-description">Loading...</div>
-          }
-        </div>
-      </a>
+      <app-mod-chip [mod]="m"></app-mod-chip>
     }
   } @else {
     No mods

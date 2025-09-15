@@ -1,0 +1,23 @@
+<a
+  class="mod-chip"
+  [href]="modUrl()"
+  target="_blank"
+  rel="noopener noreferrer"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+>
+  <span class="mod-chip-name">{{ mod.id }}</span>
+  <span class="mod-chip-version">{{ mod.version }}</span>
+  <div class="mod-tooltip">
+    @if (info; as infoData) {
+      @if (logoUrl(infoData); as logo) {
+        <img class="mod-tooltip-logo" [src]="logo" alt="" />
+      }
+      <div class="mod-tooltip-name">{{ infoData.name || mod.id }}</div>
+      <div class="mod-tooltip-description" [innerHTML]="infoData.text"></div>
+    } @else {
+      <div class="mod-tooltip-name">{{ mod.id }}</div>
+      <div class="mod-tooltip-description">Loading...</div>
+    }
+  </div>
+</a>
