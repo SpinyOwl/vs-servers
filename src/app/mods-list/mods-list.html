@@ -1,10 +1,25 @@
 <div class="mods">
   @if (mods?.length) {
     @for (m of sortedMods(); track m.id) {
-      <span class="mod-chip">
+      <a
+        class="mod-chip"
+        [href]="modUrl(m.id)"
+        target="_blank"
+        rel="noopener noreferrer"
+        (mouseenter)="loadModInfo(m.id)"
+      >
         <span class="mod-chip-name">{{ m.id }}</span>
         <span class="mod-chip-version">{{ m.version }}</span>
-      </span>
+        @if (getInfo(m.id); as info) {
+          <div class="mod-tooltip">
+            @if (imageUrl(info); as img) {
+              <img [src]="img" alt="" />
+            }
+            <div class="mod-tooltip-name">{{ info.name || m.id }}</div>
+            <div class="mod-tooltip-description">{{ info.text }}</div>
+          </div>
+        }
+      </a>
     }
   } @else {
     No mods

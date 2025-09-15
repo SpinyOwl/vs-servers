@@ -1,12 +1,15 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, tap } from 'rxjs';
-import { environment } from '../environments/environment';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {map, Observable, of, tap} from 'rxjs';
+import {environment} from '../environments/environment';
 
 export interface VsModInfo {
   id: string;
   name?: string;
   version?: string;
+  text?: string;
+  modid: string;
+
   [key: string]: any;
 }
 
@@ -15,7 +18,12 @@ interface CacheEntry {
   timestamp: number;
 }
 
-@Injectable({ providedIn: 'root' })
+interface VsModResponse {
+  statuscode: string;
+  data: VsModInfo;
+}
+
+@Injectable({providedIn: 'root'})
 export class ModsService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiUrl;
@@ -29,8 +37,27 @@ export class ModsService {
       return of(cached.data);
     }
 
-    return this.http.get<VsModInfo>(`${this.base}/m/mod/${modid}`).pipe(
-      tap(data => this.cache.set(modid, { data, timestamp: Date.now() }))
+    // convert response to VsModInfo
+    return this.getVsModInfoObservable(modid)
+      .pipe(
+        tap(response => this.cache.set(modid, {data: response.data, timestamp: Date.now()}))
+      )
+      .pipe(map(response => response.data));
+  }
+
+  private getVsModInfoObservable(modid: string) {
+    // http get with error handling
+    let url = `${this.base}/m/mod/${modid}`;
+    console.log(`Fetching mod info for ${modid} from "${url}"`);
+    return this.http.get<VsModResponse>(url).pipe(
+      map(response => {
+        if (response.statuscode === '200') {
+          return response;
+        } else {
+          console.error(`Failed to fetch mod info: ${JSON.stringify(response)}`);
+          throw new Error(`Failed to fetch mod info: ${response.statuscode}`);
+        }
+      })
     );
   }
 }
