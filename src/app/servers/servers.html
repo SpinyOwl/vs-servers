@@ -160,7 +160,7 @@
 
         @if (selectedMod(); as selected) {
           <div class="mod-summary">
-            <div class="mod-title">{{ selectedModInfo()?.name || selected.id }}</div>
+            <div class="mod-title">{{ selectedModInfo()?.name || "...." }}</div>
             <div class="mod-meta">
               <span>Version: {{ selectedModInfo()?.version || selected.version || '—' }}</span>
               <span>ID: {{ selected.id }}</span>

@@ -28,6 +28,8 @@
   border: 1px solid #6b5a46;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 table {
@@ -147,15 +149,16 @@ table tbody tr td.bool-col {
 .servers-layout {
   flex: 1 1 auto;
   min-height: 0;
-  display: grid;
   gap: 16px;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
+
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
 }
 
 .servers-layout.has-sidebar {
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 520px);
+
 }
 
 .mod-sidebar {
@@ -170,9 +173,13 @@ table tbody tr td.bool-col {
 
   height: 100%;
   max-height: 100%;
+  max-width: 520px;
   min-height: 0;
 
   overflow-y: auto;
+
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 .sidebar-header {
@@ -233,7 +240,7 @@ table tbody tr td.bool-col {
 }
 
 .mod-logo {
-  max-width: 100%;
+  max-width: fit-content;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
@@ -254,18 +261,15 @@ table tbody tr td.bool-col {
 
 @media (max-width: 1024px) {
   .servers-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr);
+    flex-direction: column;
   }
 
   .servers-layout.has-sidebar {
-    grid-template-columns: 1fr;
+
   }
 
   .mod-sidebar {
-    height: auto;
-    max-height: none;
-    overflow: visible;
+    max-width: 100%;
   }
 }
 
