@@ -2,11 +2,12 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ServersService, VsServer} from '../../services/servers.service';
+import {ModsList} from '../mods-list/mods-list';
 
 @Component({
   selector: 'app-servers',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModsList],
   templateUrl: './servers.html',
   styleUrl: './servers.scss',
 })
@@ -143,10 +144,5 @@ export class Servers implements OnInit {
     }
   }
 
-  sortedMods(s: VsServer) {
-    return s.mods!.sort((a, b) => {
-      return a.id.localeCompare(b.id);
-    });
-  }
 }
 

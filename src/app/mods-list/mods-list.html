@@ -1,0 +1,12 @@
+<div class="mods">
+  @if (mods?.length) {
+    @for (m of sortedMods(); track m.id) {
+      <span class="mod-chip">
+        <span class="mod-chip-name">{{ m.id }}</span>
+        <span class="mod-chip-version">{{ m.version }}</span>
+      </span>
+    }
+  } @else {
+    No mods
+  }
+</div>

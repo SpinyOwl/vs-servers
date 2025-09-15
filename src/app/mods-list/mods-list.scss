@@ -1,0 +1,29 @@
+.mods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  height: 62px;
+  overflow: auto;
+  max-width: 400px;
+}
+
+.mod-chip {
+  display: inline-flex;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1;
+  align-self: start;
+}
+
+.mod-chip-name {
+  background: #373737;
+  color: #fff;
+  padding: 3px 6px;
+}
+
+.mod-chip-version {
+  background: #1143a1;
+  color: #fff;
+  padding: 3px 6px;
+}
