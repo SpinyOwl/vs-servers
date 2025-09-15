@@ -66,9 +66,9 @@ export class ModChip implements OnInit {
           this.tipLogo.set(logo || null);
 
           // Prefer urlalias if provided; otherwise keep id-based URL
-          const assetId = (info as any)?.assetId as string | undefined;
-          if (assetId) {
-            this.url.set(`https://mods.vintagestory.at/show/mod/${assetId}`);
+          const assetid = (info as any)?.assetid as string | undefined;
+          if (assetid) {
+            this.url.set(`https://mods.vintagestory.at/show/mod/${assetid}`);
           }
         },
         error: () => {
