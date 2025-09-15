@@ -1,12 +1,19 @@
 <div class="feedback-container">
   <form
-    action='https://forms.zohopublic.eu/contactspin1/form/ProductFeedback/formperma/BOpP7g59hlzGOFHdn9aYEJz-eK1J5gEP6Q60gtGhAnk/htmlRecords/submit'
-    name='form' id='form' method='POST' accept-charset='UTF-8' enctype='multipart/form-data'>
-    <input type="hidden" name="zf_referrer_name" value="">
+    action="https://forms.zohopublic.eu/contactspin1/form/ProductFeedback/formperma/BOpP7g59hlzGOFHdn9aYEJz-eK1J5gEP6Q60gtGhAnk/htmlRecords/submit"
+    name="form"
+    id="form"
+    method="POST"
+    accept-charset="UTF-8"
+    enctype="multipart/form-data"
+    #feedbackForm="ngForm"
+    novalidate
+  >
+    <input type="hidden" name="zf_referrer_name" value="" />
     <!-- To Track referrals , place the referrer name within the " " in the above hidden input field -->
-    <input type="hidden" name="zf_redirect_url" value="">
+    <input type="hidden" name="zf_redirect_url" value="" />
     <!-- To redirect to a specific page after record submission , place the respective url within the " " in the above hidden input field -->
-    <input type="hidden" name="zc_gad" value="">
+    <input type="hidden" name="zc_gad" value="" />
     <!-- If GCLID is enabled in Zoho CRM Integration, click details of AdWords Ads will be pushed to Zoho CRM -->
     <h2>Product Feedback</h2>
     <p></p>
@@ -14,30 +21,74 @@
     <label class="section-label"> Your Name</label>
     <div class="input-wrapper">
       <div class="name-input">
-        <input type="text" maxlength="255" name="Name_First" id="Name_First" fieldType=7 placeholder=""/>
+        <input
+          type="text"
+          maxlength="255"
+          name="Name_First"
+          id="Name_First"
+          fieldType="7"
+          placeholder=""
+          [(ngModel)]="firstName"
+        />
         <label for="Name_First">First</label>
       </div>
       <div class="name-input">
-        <input type="text" maxlength="255" name="Name_Last" id="Name_Last" fieldType=7 placeholder=""/>
+        <input
+          type="text"
+          maxlength="255"
+          name="Name_Last"
+          id="Name_Last"
+          fieldType="7"
+          placeholder=""
+          [(ngModel)]="lastName"
+        />
         <label for="Name_Last">Last</label>
       </div>
     </div>
     <!--Email-->
-    <div class="section-label"> Your Email <em>*</em></div>
+    <div class="section-label">Your Email <em>*</em></div>
     <div class="input-wrapper">
-      <input type="text" maxlength="255" name="Email" value="" fieldType=9 placeholder=""/>
+      <input
+        type="email"
+        maxlength="255"
+        name="Email"
+        [(ngModel)]="email"
+        #emailModel="ngModel"
+        required
+        email
+        fieldType="9"
+        placeholder=""
+      />
+    </div>
+    <div class="error" *ngIf="emailModel.errors?.['required'] && emailModel.touched">
+      Email is required.
+    </div>
+    <div class="error" *ngIf="emailModel.errors?.['email'] && emailModel.touched">
+      Please enter a valid email address.
     </div>
     <!--Multi Line-->
-    <div class="section-label"> Provide your feedback or request here</div>
+    <div class="section-label">Provide your feedback or request here</div>
     <div class="input-wrapper">
-      <textarea name="MultiLine" maxlength="65535" placeholder=""></textarea>
+      <textarea
+        name="MultiLine"
+        [(ngModel)]="message"
+        #messageModel="ngModel"
+        maxlength="{{ maxLength }}"
+        placeholder=""
+        required
+        rows="8"
+      ></textarea>
       <!--Decision Box-->
     </div>
-    <input type="checkbox" id="DecisionBox" name="DecisionBox"/>
+    <div class="char-counter">{{ maxLength - message.length }} characters remaining</div>
+    <div class="error" *ngIf="messageModel.invalid && messageModel.touched">
+      Feedback is required.
+    </div>
+    <input type="checkbox" id="DecisionBox" name="DecisionBox" />
     <label for="DecisionBox">Use my feedback as testimonial</label>
 
     <div class="input-wrapper">
-      <button type="submit">Submit</button>
+      <button type="submit" [disabled]="!feedbackForm.valid">Submit</button>
     </div>
   </form>
 </div>

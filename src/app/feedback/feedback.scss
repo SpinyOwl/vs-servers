@@ -10,7 +10,9 @@ label {
   display: inline-block;
 }
 
-input, textarea, button {
+input,
+textarea,
+button {
   display: inline-block;
 }
 
@@ -42,10 +44,24 @@ em {
   margin-top: 16px;
 }
 
-input[type="text"], textarea {
+input[type='text'],
+input[type='email'],
+textarea {
   width: 100%;
   padding: 4px;
   box-sizing: border-box;
 }
 
+.error {
+  background: firebrick;
+  font-size: 12px;
+  margin-top: 4px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
 
+.char-counter {
+  margin-left: auto;
+  font-size: 12px;
+  opacity: 0.6;
+}
