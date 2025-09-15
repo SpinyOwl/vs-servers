@@ -13,8 +13,8 @@
         <span class="mod-chip-version">{{ m.version }}</span>
         <div class="mod-tooltip">
           @if (getInfo(m.id); as info) {
-            @if (imageUrl(info); as img) {
-              <img [src]="img" alt="" />
+            @if (logoUrl(info); as logo) {
+              <img class="mod-tooltip-logo" [src]="logo" alt="" />
             }
             <div class="mod-tooltip-name">{{ info.name || m.id }}</div>
             <div class="mod-tooltip-description" [innerHTML]="info.text"></div>

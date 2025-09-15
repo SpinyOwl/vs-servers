@@ -43,7 +43,7 @@
   color: #fff;
   font-size: 12px;
   pointer-events: none;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, .2);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
   translate: 0 22px;
 }
 
@@ -51,6 +51,15 @@
   max-width: 100%;
   display: block;
   margin-bottom: 4px;
+}
+
+.mod-tooltip-logo {
+  max-width: 64px;
+  max-height: 64px;
+}
+
+.mod-tooltip-description {
+  display: none;
 }
 
 .mod-chip:hover .mod-tooltip {

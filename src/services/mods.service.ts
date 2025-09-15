@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {map, Observable, of, tap} from 'rxjs';
+import {map, Observable, of} from 'rxjs';
 import {environment} from '../environments/environment';
 
 export interface VsModInfo {

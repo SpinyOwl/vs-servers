@@ -1,7 +1,7 @@
-import {Component, HostListener, inject, Input} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {VsMod} from '../../services/servers.service';
-import {ModsService, VsModInfo} from '../../services/mods.service';
+import { Component, HostListener, inject, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { VsMod } from '../../services/servers.service';
+import { ModsService, VsModInfo } from '../../services/mods.service';
 
 @Component({
   selector: 'app-mods-list',
@@ -60,14 +60,7 @@ export class ModsList {
     return `https://mods.vintagestory.at/show/mod/${modid}`;
   }
 
-  imageUrl(info: VsModInfo): string | undefined {
-    return (
-      info['image'] ||
-      info['icon'] ||
-      info['logo'] ||
-      info['iconurl'] ||
-      info['img'] ||
-      info['thumbnail']
-    );
+  logoUrl(info: VsModInfo): string | undefined {
+    return info['logofile'];
   }
 }
