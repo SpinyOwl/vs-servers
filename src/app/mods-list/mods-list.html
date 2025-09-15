@@ -10,15 +10,18 @@
       >
         <span class="mod-chip-name">{{ m.id }}</span>
         <span class="mod-chip-version">{{ m.version }}</span>
-        @if (getInfo(m.id); as info) {
-          <div class="mod-tooltip">
+        <div class="mod-tooltip">
+          @if (getInfo(m.id); as info) {
             @if (imageUrl(info); as img) {
               <img [src]="img" alt="" />
             }
             <div class="mod-tooltip-name">{{ info.name || m.id }}</div>
             <div class="mod-tooltip-description">{{ info.text }}</div>
-          </div>
-        }
+          } @else {
+            <div class="mod-tooltip-name">{{ m.id }}</div>
+            <div class="mod-tooltip-description">Loading...</div>
+          }
+        </div>
       </a>
     }
   } @else {
