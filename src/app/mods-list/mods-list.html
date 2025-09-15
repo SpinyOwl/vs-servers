@@ -1,4 +1,4 @@
-<div class="mods">
+<div class="mods" (scroll)="updateTooltipPosition()">
   @if (mods?.length) {
     @for (m of sortedMods(); track m.id) {
       <a
@@ -6,7 +6,8 @@
         [href]="modUrl(m.id)"
         target="_blank"
         rel="noopener noreferrer"
-        (mouseenter)="loadModInfo(m.id)"
+        (mouseenter)="loadModInfo(m.id); onChipEnter($event)"
+        (mouseleave)="onChipLeave()"
       >
         <span class="mod-chip-name">{{ m.id }}</span>
         <span class="mod-chip-version">{{ m.version }}</span>
@@ -16,7 +17,7 @@
               <img [src]="img" alt="" />
             }
             <div class="mod-tooltip-name">{{ info.name || m.id }}</div>
-            <div class="mod-tooltip-description">{{ info.text }}</div>
+            <div class="mod-tooltip-description" [innerHTML]="info.text"></div>
           } @else {
             <div class="mod-tooltip-name">{{ m.id }}</div>
             <div class="mod-tooltip-description">Loading...</div>

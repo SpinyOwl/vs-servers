@@ -9,6 +9,7 @@ export interface VsModInfo {
   version?: string;
   text?: string;
   modid: string;
+  logofile?: string;
 
   [key: string]: any;
 }
