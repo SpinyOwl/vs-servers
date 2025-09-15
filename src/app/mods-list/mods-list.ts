@@ -12,7 +12,7 @@ import { ModChip } from '../mod-chip/mod-chip';
 })
 export class ModsList {
   @Input() mods: VsMod[] | null | undefined;
-  @ViewChildren(ModChip) private chips!: QueryList<ModChip>;
+  @ViewChildren(ModChip) private readonly chips!: QueryList<ModChip>;
 
   sortedMods() {
     return (this.mods ?? []).slice().sort((a, b) => a.id.localeCompare(b.id));

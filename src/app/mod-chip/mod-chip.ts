@@ -1,7 +1,19 @@
-import { Component, ElementRef, HostListener, Input, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { VsMod } from '../../services/servers.service';
-import { ModsService, VsModInfo } from '../../services/mods.service';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  inject,
+  Input,
+  OnInit,
+  signal,
+} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+
+import {VsMod} from '../../services/servers.service';
+import {ModsService, VsModInfo} from '../../services/mods.service';
 
 @Component({
   selector: 'app-mod-chip',
@@ -9,21 +21,66 @@ import { ModsService, VsModInfo } from '../../services/mods.service';
   imports: [CommonModule],
   templateUrl: './mod-chip.html',
   styleUrl: './mod-chip.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ModChip {
-  @Input({ required: true }) mod!: VsMod;
+export class ModChip implements OnInit {
+  @Input({required: true}) mod!: VsMod;
 
-  private readonly modsService = inject(ModsService);
+  private readonly mods = inject(ModsService);
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
 
-  info?: VsModInfo;
-  private requested = false;
+
   private hovered = false;
+
+  // ---- Placeholder-first state (signals auto-trigger view updates on OnPush) ----
+  // Link URL starts as placeholder; becomes real when mod info arrives.
+  url = signal<string>('#');
+
+  // Tooltip content placeholders
+  tipTitle = signal<string>('Loading…');
+  tipHtml = signal<string>('Fetching details…'); // rendered via [innerHTML]
+  tipLogo = signal<string | null>(null);
+
+  // convenience: fallback logo/name helpers if needed elsewhere
+  logoUrl = (info: VsModInfo) => (info as any)['logofile'] as string | undefined;
+
+  ngOnInit(): void {
+    // Initialize with safe placeholders derived from input, so it looks “ready” instantly.
+    const id = this.mod?.id ?? '';
+    this.tipTitle.set(id || 'Loading…');
+    this.tipHtml.set('Hover to load details…');
+
+    // Start async fetch; any emitted values will update the view automatically.
+    this.mods
+      .get$(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (info) => {
+          // Title / description
+          this.tipTitle.set(info?.name || id);
+          this.tipHtml.set(info?.text || 'No description.');
+
+          // Logo
+          const logo = (info as any)?.logofile as string | undefined;
+          this.tipLogo.set(logo || null);
+
+          // Prefer urlalias if provided; otherwise keep id-based URL
+          const assetId = (info as any)?.assetId as string | undefined;
+          if (assetId) {
+            this.url.set(`https://mods.vintagestory.at/show/mod/${assetId}`);
+          }
+        },
+        error: () => {
+          this.tipHtml.set('Failed to load details. Hover again to retry.');
+          // keep existing URL fallback; nothing else to do
+        },
+      });
+  }
 
   onMouseEnter() {
     this.hovered = true;
     this.updateTooltipPosition();
-    this.loadModInfo();
   }
 
   onMouseLeave() {
@@ -51,32 +108,5 @@ export class ModChip {
     tooltip.style.top = `${rect.top}px`;
   }
 
-  modUrl() {
-    const assetId = this.info?.assetId;
-    if (assetId != null) {
-      return `https://mods.vintagestory.at/show/mod/${assetId}`;
-    }
-    return '#';
-  }
 
-  logoUrl(info: VsModInfo): string | undefined {
-    return info['logofile'];
-  }
-
-  private loadModInfo() {
-    if (this.requested) return;
-    const id = this.mod?.id;
-    if (!id) return;
-    this.requested = true;
-    this.modsService.get$(id).subscribe({
-      next: (info) => {
-        this.info = info;
-        this.updateTooltipPosition();
-      },
-      error: (err) => {
-        console.error(`Failed to load mod info for ${id}`, err);
-        this.requested = false;
-      },
-    });
-  }
 }
