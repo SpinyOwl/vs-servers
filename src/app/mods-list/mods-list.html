@@ -1,7 +1,7 @@
-<div class="mods" (scroll)="onScroll()">
+<div class="mods">
   @if (mods?.length) {
     @for (m of sortedMods(); track m.id) {
-      <app-mod-chip [mod]="m"></app-mod-chip>
+      <app-mod-chip [mod]="m" (view)="modSelected.emit($event)"></app-mod-chip>
     }
   } @else {
     No mods

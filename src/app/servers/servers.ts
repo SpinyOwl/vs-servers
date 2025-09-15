@@ -1,8 +1,9 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {ServersService, VsServer} from '../../services/servers.service';
+import {ServersService, VsMod, VsServer} from '../../services/servers.service';
 import {ModsList} from '../mods-list/mods-list';
+import {ModsService, VsModInfo} from '../../services/mods.service';
 
 @Component({
   selector: 'app-servers',
@@ -13,6 +14,7 @@ import {ModsList} from '../mods-list/mods-list';
 })
 export class Servers implements OnInit {
   private readonly api = inject(ServersService);
+  private readonly mods = inject(ModsService);
 
   // raw and filtered data
   servers = signal<VsServer[]>([]);
@@ -101,6 +103,20 @@ export class Servers implements OnInit {
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
 
+  // sidebar state
+  selectedMod = signal<VsMod | null>(null);
+  selectedModId = signal<string | null>(null);
+  selectedModInfo = signal<VsModInfo | null>(null);
+  modLoading = signal<boolean>(false);
+  modError = signal<string | null>(null);
+
+  modLink = computed(() => {
+    const info = this.selectedModInfo();
+    const assetId = info?.assetid;
+    if (!assetId) return null;
+    return `https://mods.vintagestory.at/show/mod/${assetId}`;
+  });
+
   ngOnInit(): void {
     this.reload();
   }
@@ -142,6 +158,47 @@ export class Servers implements OnInit {
       this.sortColumn.set(col);
       this.sortAsc.set(true);
     }
+  }
+
+  showMod(mod: VsMod) {
+    const id = mod?.id?.trim();
+    if (!id) {
+      return;
+    }
+
+    this.selectedMod.set(mod);
+
+    if (this.selectedModId() === id && this.selectedModInfo()) {
+      this.modLoading.set(false);
+      this.modError.set(null);
+      return;
+    }
+
+    this.selectedModId.set(id);
+    this.selectedModInfo.set(null);
+    this.modLoading.set(true);
+    this.modError.set(null);
+
+    this.mods.get$(id).subscribe({
+      next: (info) => {
+        if (this.selectedModId() !== id) return;
+        this.selectedModInfo.set(info);
+        this.modLoading.set(false);
+      },
+      error: (err) => {
+        if (this.selectedModId() !== id) return;
+        this.modError.set(String(err?.message ?? err ?? 'Failed to load mod information.'));
+        this.modLoading.set(false);
+      },
+    });
+  }
+
+  closeSidebar() {
+    this.selectedMod.set(null);
+    this.selectedModId.set(null);
+    this.selectedModInfo.set(null);
+    this.modLoading.set(false);
+    this.modError.set(null);
   }
 
 }

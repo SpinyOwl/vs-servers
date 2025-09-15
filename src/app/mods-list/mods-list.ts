@@ -1,4 +1,4 @@
-import { Component, Input, QueryList, ViewChildren } from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VsMod } from '../../services/servers.service';
 import { ModChip } from '../mod-chip/mod-chip';
@@ -12,13 +12,9 @@ import { ModChip } from '../mod-chip/mod-chip';
 })
 export class ModsList {
   @Input() mods: VsMod[] | null | undefined;
-  @ViewChildren(ModChip) private readonly chips!: QueryList<ModChip>;
+  @Output() modSelected = new EventEmitter<VsMod>();
 
   sortedMods() {
     return (this.mods ?? []).slice().sort((a, b) => a.id.localeCompare(b.id));
-  }
-
-  onScroll() {
-    this.chips?.forEach((chip) => chip.updateTooltipPosition());
   }
 }
