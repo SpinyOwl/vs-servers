@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { App } from './app';
-import { Servers } from './servers';
+import { Servers } from './servers/servers';
 import { ServersService } from '../services/servers.service';
 
 describe('App', () => {

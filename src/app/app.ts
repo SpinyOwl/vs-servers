@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Header } from './header';
-import { Servers } from './servers';
+import { Header } from './header/header';
+import { Servers } from './servers/servers';
 
 @Component({
   selector: 'app-root',

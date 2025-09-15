@@ -1,7 +1,7 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {ServersService, VsServer} from '../services/servers.service';
+import {ServersService, VsServer} from '../../services/servers.service';
 
 @Component({
   selector: 'app-servers',

@@ -1,8 +1,19 @@
 .header {
   display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.top-row {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+}
+
+.top-right {
+  display: flex;
+  gap: 4px;
 }
 
 .btn {
