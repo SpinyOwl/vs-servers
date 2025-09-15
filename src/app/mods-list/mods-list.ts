@@ -21,11 +21,9 @@ export class ModsList {
   }
 
   loadModInfo(modid: string) {
-    console.log(`Loading mod info for ${modid}. ${this.infoMap.has(modid)}`);
     if (!this.infoMap.has(modid)) {
       this.modsService.get$(modid).subscribe((info) => {
         this.infoMap.set(modid, info);
-        console.log(`Loaded mod info for ${modid}`);
       });
     }
   }

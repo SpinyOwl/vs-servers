@@ -20,7 +20,7 @@ interface CacheEntry {
 
 interface VsModResponse {
   statuscode: string;
-  data: VsModInfo;
+  mod: VsModInfo;
 }
 
 @Injectable({providedIn: 'root'})
@@ -39,10 +39,10 @@ export class ModsService {
 
     // convert response to VsModInfo
     return this.getVsModInfoObservable(modid)
-      .pipe(
-        tap(response => this.cache.set(modid, {data: response.data, timestamp: Date.now()}))
-      )
-      .pipe(map(response => response.data));
+      .pipe(map(response => {
+        this.cache.set(modid, {data: response.mod, timestamp: Date.now()});
+        return response.mod;
+      }));
   }
 
   private getVsModInfoObservable(modid: string) {
