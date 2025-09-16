@@ -1,0 +1,39 @@
+<aside class="mod-sidebar">
+  <div class="sidebar-header">
+    <div>Mod details</div>
+    <button type="button" class="sidebar-close" (click)="onClose()">Close</button>
+  </div>
+
+  @if (mod(); as selected) {
+    <div class="mod-summary">
+      <div class="mod-title">{{ info()?.name || '....' }}</div>
+      <div class="mod-meta">
+        <span>Version: {{ info()?.version || selected.version || '—' }}</span>
+        <span>ID: {{ selected.id }}</span>
+      </div>
+      @if (modLink(); as link) {
+        <a class="mod-link" [href]="link" target="_blank" rel="noopener noreferrer">
+          View on mods.vintagestory.at
+        </a>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="info">Loading mod information…</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else {
+    @if (info(); as info) {
+      @if (info.logofile) {
+        <img class="mod-logo" [src]="info.logofile" alt=""/>
+      }
+
+      @if (info.text) {
+        <div class="mod-description" [innerHTML]="info.text"></div>
+      } @else {
+        <p class="muted">No additional description provided.</p>
+      }
+    }
+  }
+</aside>

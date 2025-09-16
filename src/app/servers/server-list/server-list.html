@@ -1,0 +1,139 @@
+<div class="pagination">
+  <div class="count">
+    {{ filtered().length }} server{{ filtered().length === 1 ? '' : 's' }}
+  </div>
+  <button class="btn" (click)="prev()" [disabled]="page() <= 1">Prev</button>
+  <span class="muted">Page {{ page() }} / {{ pages() }}</span>
+  <button class="btn" (click)="next()" [disabled]="page() >= pages()">Next</button>
+  <select (ngModelChange)="setPageSize($event)" [ngModel]="pageSize()" class="select">
+    <option [ngValue]="10">10 / page</option>
+    <option [ngValue]="20">20 / page</option>
+    <option [ngValue]="50">50 / page</option>
+    <option [ngValue]="100">100 / page</option>
+  </select>
+</div>
+
+<div class="tableWrap">
+  <table>
+    <thead>
+    <tr class="filters">
+      <th>
+        <input
+          (ngModelChange)="page.set(1)"
+          [(ngModel)]="filterName"
+          class="input"
+          placeholder="Filter by server name…"
+        />
+      </th>
+      <th></th>
+      <th>
+        <input
+          (ngModelChange)="page.set(1)"
+          [(ngModel)]="filterMod"
+          class="input"
+          placeholder="Filter by mod id…"
+        />
+      </th>
+      <th></th>
+      <th class="bool-col">
+        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterHasPassword" class="select">
+          <option [ngValue]="''">All passwords</option>
+          <option [ngValue]="'true'">Has password</option>
+          <option [ngValue]="'false'">No password</option>
+        </select>
+      </th>
+      <th class="bool-col">
+        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterWhitelisted" class="select">
+          <option [ngValue]="''">All access</option>
+          <option [ngValue]="'true'">Whitelisted</option>
+          <option [ngValue]="'false'">Not whitelisted</option>
+        </select>
+      </th>
+      <th class="game-version">
+        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterVersion" class="select">
+          <option [ngValue]="''">All versions</option>
+          @for (v of versions(); track v) {
+            <option [ngValue]="v">{{ v }}</option>
+          }
+        </select>
+      </th>
+    </tr>
+    <tr class="columns">
+      <th (click)="sortBy('serverName')">
+        Server
+        @if (sortColumn() === 'serverName') {
+          <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
+        }
+      </th>
+      <th class="description" (click)="sortBy('gameDescription')">
+        Description
+        @if (sortColumn() === 'gameDescription') {
+          <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
+        }
+      </th>
+      <th (click)="sortBy('mods')">
+        Mods
+        @if (sortColumn() === 'mods') {
+          <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
+        }
+      </th>
+      <th (click)="sortBy('players')">
+        Players
+        @if (sortColumn() === 'players') {
+          <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
+        }
+      </th>
+      <th class="bool-col">
+        <span class="material-symbols-outlined">key_vertical</span>
+      </th>
+      <th class="bool-col">
+        <span class="material-symbols-outlined">list_alt_check</span>
+      </th>
+      <th class="game-version" (click)="sortBy('gameVersion')">
+        Game version
+        @if (sortColumn() === 'gameVersion') {
+          <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
+        }
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (s of paged(); track s.serverIP) {
+        <tr>
+          <td>
+            <div class="server-name">
+              {{ s.serverName || '—' }}
+              <a href="vintagestoryjoin://{{ s.serverIP }}">
+                <span class="material-symbols-outlined">open_in_new</span>
+              </a>
+            </div>
+          </td>
+          <td>
+            <div class="description">
+              @if (s.gameDescription) {
+                <div [innerHTML]="s.gameDescription"></div>
+              }
+            </div>
+          </td>
+          <td>
+            <app-mods-list [mods]="s.mods" (modSelected)="modSelected.emit($event)"></app-mods-list>
+          </td>
+          <td>{{ s.players }} / {{ s.maxPlayers }}</td>
+          <td class="bool-col">
+            <span class="material-symbols-outlined">{{ s.hasPassword ? 'check' : 'close' }}</span>
+          </td>
+          <td class="bool-col">
+            <span class="material-symbols-outlined">{{ s.whitelisted ? 'check' : 'close' }}</span>
+          </td>
+          <td class="game-version">
+            <span class="chip">{{ s.gameVersion || '—' }}</span>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="empty">No servers match your filters.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

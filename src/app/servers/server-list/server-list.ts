@@ -1,0 +1,137 @@
+import {Component, computed, effect, input, output, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {ModsList} from '../mods-list/mods-list';
+import {VsMod, VsServer} from '../../../services/servers.service';
+
+@Component({
+  selector: 'app-server-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ModsList],
+  templateUrl: './server-list.html',
+  styleUrl: './server-list.scss',
+})
+export class ServerList {
+  servers = input<VsServer[]>([]);
+  modSelected = output<VsMod>();
+
+  filterName = signal<string>('');
+  filterVersion = signal<string>('');
+  filterMod = signal<string>('');
+  filterHasPassword = signal<string>('');
+  filterWhitelisted = signal<string>('');
+  pageSize = signal<number>(20);
+  page = signal<number>(1);
+  sortColumn = signal<string>('');
+  sortAsc = signal<boolean>(true);
+
+  versions = computed(() => {
+    const list = this.servers()
+      .map((s) => s.gameVersion)
+      .filter((v): v is string => !!v);
+    return Array.from(new Set(list)).sort((a, b) => a.localeCompare(b)).reverse();
+  });
+
+  filtered = computed(() => {
+    const nameQ = this.filterName().trim().toLowerCase();
+    const ver = this.filterVersion().trim();
+    const mod = this.filterMod().trim().toLowerCase();
+    const hasPw = this.filterHasPassword().trim();
+    const wl = this.filterWhitelisted().trim();
+    return this.servers().filter((s) => {
+      const n = (s.serverName ?? '').toLowerCase();
+      const modMatch = s.mods?.some((m) => m.id.toLowerCase().includes(mod)) ?? false;
+      const pwMatch = !hasPw || String(s.hasPassword ?? false) === hasPw;
+      const wlMatch = !wl || String(s.whitelisted ?? false) === wl;
+      return (
+        (!nameQ || n.includes(nameQ)) &&
+        (!ver || s.gameVersion === ver) &&
+        (!mod || modMatch) &&
+        pwMatch &&
+        wlMatch
+      );
+    });
+  });
+
+  sorted = computed(() => {
+    const col = this.sortColumn();
+    const asc = this.sortAsc();
+    const list = this.filtered().slice();
+    if (col) {
+      list.sort((a, b) => {
+        let av: any;
+        let bv: any;
+        switch (col) {
+          case 'serverName':
+            av = a.serverName || '';
+            bv = b.serverName || '';
+            return av.localeCompare(bv);
+          case 'gameDescription':
+            av = a.gameDescription || '';
+            bv = b.gameDescription || '';
+            return av.localeCompare(bv);
+          case 'mods':
+            av = a.mods?.length || 0;
+            bv = b.mods?.length || 0;
+            return av - bv;
+          case 'players':
+            av = a.players || 0;
+            bv = b.players || 0;
+            return av - bv;
+          case 'gameVersion':
+            av = a.gameVersion || '';
+            bv = b.gameVersion || '';
+            return av.localeCompare(bv);
+          default:
+            return 0;
+        }
+      });
+      if (!asc) list.reverse();
+    }
+    return list;
+  });
+
+  pages = computed(() => Math.max(1, Math.ceil(this.sorted().length / this.pageSize())));
+  paged = computed(() => {
+    const start = (this.page() - 1) * this.pageSize();
+    return this.sorted().slice(start, start + this.pageSize());
+  });
+
+  constructor() {
+    effect(() => {
+      this.servers();
+      this.page.set(1);
+    });
+
+    effect(() => {
+      const maxPages = this.pages();
+      const current = this.page();
+      if (current > maxPages) {
+        this.page.set(maxPages);
+      }
+    });
+  }
+
+  setPageSize(val: string | number) {
+    const n = Number(val) || 20;
+    this.pageSize.set(n);
+    this.page.set(1);
+  }
+
+  prev() {
+    if (this.page() > 1) this.page.set(this.page() - 1);
+  }
+
+  next() {
+    if (this.page() < this.pages()) this.page.set(this.page() + 1);
+  }
+
+  sortBy(col: string) {
+    if (this.sortColumn() === col) {
+      this.sortAsc.set(!this.sortAsc());
+    } else {
+      this.sortColumn.set(col);
+      this.sortAsc.set(true);
+    }
+  }
+}
