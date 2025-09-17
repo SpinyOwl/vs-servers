@@ -1,4 +1,10 @@
-<button type="button" class="mod-chip" (click)="onClick()">
+<button
+  type="button"
+  class="mod-chip"
+  (click)="onClick()"
+  [attr.title]="tooltip$ | async"
+  [attr.aria-label]="tooltip$ | async"
+>
   <span class="mod-chip-name">{{ mod.id }}</span>
   <span class="mod-chip-version">{{ mod.version }}</span>
 </button>
