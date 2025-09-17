@@ -27,12 +27,11 @@
       </th>
       <th></th>
       <th>
-        <input
-          (ngModelChange)="page.set(1)"
-          [(ngModel)]="filterMod"
-          class="input"
+        <app-mod-filter
+          [mods]="filterMods()"
+          (modsChange)="onFilterModsChange($event)"
           placeholder="Filter by mod id…"
-        />
+        ></app-mod-filter>
       </th>
       <th></th>
       <th class="bool-col">

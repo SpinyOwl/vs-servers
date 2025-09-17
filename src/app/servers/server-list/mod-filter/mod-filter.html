@@ -1,0 +1,49 @@
+<div class="mod-filter" (click)="onContainerClick()">
+  <div class="control">
+    @for (mod of mods(); track mod) {
+      <span class="chip">
+        {{ mod }}
+        <button
+          type="button"
+          class="remove"
+          (click)="removeModClicked($event, mod)"
+          aria-label="Remove mod {{ mod }}"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </span>
+    }
+
+    <input
+      #inputElement
+      type="text"
+      [value]="query()"
+      (input)="onInput($event)"
+      (keydown)="onKeydown($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      [placeholder]="mods().length ? '' : placeholder()"
+      autocomplete="off"
+      aria-label="Filter by mod id"
+    />
+  </div>
+
+  @if (showSuggestions()) {
+    <ul class="suggestions">
+      @for (suggestion of suggestions(); track suggestion.value) {
+        <li>
+          <button
+            type="button"
+            (mousedown)="onSuggestionMouseDown($event)"
+            (click)="selectSuggestion(suggestion.value)"
+          >
+            <span class="primary">{{ suggestion.value }}</span>
+            @if (suggestion.description) {
+              <span class="secondary">{{ suggestion.description }}</span>
+            }
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

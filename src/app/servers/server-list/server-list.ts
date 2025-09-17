@@ -2,6 +2,7 @@ import {Component, DestroyRef, computed, effect, inject, input, output, signal} 
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ModsList} from '../mods-list/mods-list';
+import {ModFilter} from './mod-filter/mod-filter';
 import {VsMod, VsServer} from '../../../services/servers.service';
 import {ActivatedRoute, ParamMap, Params, Router} from '@angular/router';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -9,7 +10,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-server-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModsList],
+  imports: [CommonModule, FormsModule, ModsList, ModFilter],
   templateUrl: './server-list.html',
   styleUrl: './server-list.scss',
 })
@@ -23,7 +24,7 @@ export class ServerList {
 
   filterName = signal<string>('');
   filterVersion = signal<string>('');
-  filterMod = signal<string>('');
+  filterMods = signal<string[]>([]);
   filterHasPassword = signal<string>('');
   filterWhitelisted = signal<string>('');
   pageSize = signal<number>(20);
@@ -41,18 +42,22 @@ export class ServerList {
   filtered = computed(() => {
     const nameQ = this.filterName().trim().toLowerCase();
     const ver = this.filterVersion().trim();
-    const mod = this.filterMod().trim().toLowerCase();
+    const mods = this.filterMods()
+      .map((value) => value.trim().toLowerCase())
+      .filter((value) => value.length > 0);
     const hasPw = this.filterHasPassword().trim();
     const wl = this.filterWhitelisted().trim();
     return this.servers().filter((s) => {
       const n = (s.serverName ?? '').toLowerCase();
-      const modMatch = s.mods?.some((m) => m.id.toLowerCase().includes(mod)) ?? false;
+      const modMatch =
+        mods.length === 0 ||
+        mods.every((mod) => s.mods?.some((m) => m.id.toLowerCase().includes(mod)) ?? false);
       const pwMatch = !hasPw || String(s.hasPassword ?? false) === hasPw;
       const wlMatch = !wl || String(s.whitelisted ?? false) === wl;
       return (
         (!nameQ || n.includes(nameQ)) &&
         (!ver || s.gameVersion === ver) &&
-        (!mod || modMatch) &&
+        modMatch &&
         pwMatch &&
         wlMatch
       );
@@ -135,7 +140,7 @@ export class ServerList {
 
       this.writeStringParam(nextParams, 'name', this.filterName());
       this.writeStringParam(nextParams, 'version', this.filterVersion());
-      this.writeStringParam(nextParams, 'mod', this.filterMod());
+      this.writeStringArrayParam(nextParams, 'mod', this.filterMods());
       this.writeBooleanParam(nextParams, 'hasPassword', this.filterHasPassword());
       this.writeBooleanParam(nextParams, 'whitelisted', this.filterWhitelisted());
       this.writeNumberParam(nextParams, 'pageSize', this.pageSize(), 20);
@@ -155,6 +160,11 @@ export class ServerList {
   setPageSize(val: string | number) {
     const n = Number(val) || 20;
     this.pageSize.set(n);
+    this.page.set(1);
+  }
+
+  onFilterModsChange(mods: string[]) {
+    this.filterMods.set(mods);
     this.page.set(1);
   }
 
@@ -190,9 +200,9 @@ export class ServerList {
       touched = true;
     }
 
-    const mod = params.get('mod');
-    if (mod !== null && this.filterMod() !== mod) {
-      this.filterMod.set(mod);
+    const mods = this.normalizeModParams(params.getAll('mod'));
+    if (!this.arraysEqual(this.filterMods(), mods)) {
+      this.filterMods.set(mods);
       touched = true;
     }
 
@@ -300,6 +310,23 @@ export class ServerList {
     }
   }
 
+  private writeStringArrayParam(params: Params, key: string, values: string[]) {
+    const normalized = values
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+    if (!normalized.length) {
+      delete params[key];
+      return;
+    }
+
+    if (normalized.length === 1) {
+      params[key] = normalized[0];
+      return;
+    }
+
+    params[key] = normalized;
+  }
+
   private writeNumberParam(params: Params, key: string, value: number, defaultValue: number) {
     if (!Number.isFinite(value)) {
       delete params[key];
@@ -361,5 +388,34 @@ export class ServerList {
     }
 
     return false;
+  }
+
+  private normalizeModParams(values: string[]): string[] {
+    const result: string[] = [];
+    for (const value of values) {
+      if (typeof value !== 'string') {
+        continue;
+      }
+      const parts = value
+        .split(',')
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0);
+      result.push(...parts);
+    }
+    return result;
+  }
+
+  private arraysEqual(a: readonly string[], b: readonly string[]): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
