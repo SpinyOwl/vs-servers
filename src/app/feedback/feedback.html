@@ -6,7 +6,7 @@
     method="POST"
     accept-charset="UTF-8"
     enctype="multipart/form-data"
-    #feedbackForm="ngForm"
+    ngNoForm
     novalidate
   >
     <input type="hidden" name="zf_referrer_name" value=""/>
@@ -90,11 +90,17 @@
         Feedback is required.
       </div>
     }
-    <input type="checkbox" id="DecisionBox" name="DecisionBox"/>
+    <input
+      type="checkbox"
+      id="DecisionBox"
+      name="DecisionBox"
+      value="true"
+      [(ngModel)]="isTestimonial"
+    />
     <label for="DecisionBox">Use my feedback as testimonial</label>
 
     <div class="input-wrapper">
-      <button type="submit" [disabled]="!feedbackForm.valid">Submit</button>
+      <button type="submit" [disabled]="emailModel.invalid || messageModel.invalid">Submit</button>
     </div>
   </form>
 </div>

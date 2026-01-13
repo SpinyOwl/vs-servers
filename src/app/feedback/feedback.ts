@@ -15,4 +15,5 @@ export class Feedback {
   email = '';
   firstName = '';
   lastName = '';
+  isTestimonial = false;
 }
