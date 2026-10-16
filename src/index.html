@@ -2,6 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <script>
+    // Pick design (classic|a|b) and theme (dark|light) before first paint: ?design=b&theme=light, else saved choice.
+    (function () {
+      var d = document.documentElement, q = new URLSearchParams(location.search);
+      function pick(key, allowed, fallback) {
+        var v = q.get(key);
+        try { if (allowed.indexOf(v) < 0) v = localStorage.getItem('vs-' + key); } catch (e) {}
+        return allowed.indexOf(v) < 0 ? fallback : v;
+      }
+      var design = pick('design', ['classic', 'a', 'b'], 'a');
+      var theme = pick('theme', ['dark', 'light'], null);
+      if (!theme) theme = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches && design !== 'classic' ? 'light' : 'dark';
+      d.setAttribute('data-design', design);
+      d.setAttribute('data-theme', theme);
+    })();
+  </script>
   <title>Vintage Story — Public Servers</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">

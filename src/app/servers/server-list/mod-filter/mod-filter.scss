@@ -16,9 +16,9 @@
   gap: 4px;
   padding: 4px;
   min-height: 32px;
-  border: 1px solid #6b5a46;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #3e3327;
+  background: var(--input-bg);
   cursor: text;
 }
 
@@ -27,7 +27,7 @@
   min-width: 120px;
   border: none;
   background: transparent;
-  color: #fff;
+  color: var(--text);
   outline: none;
   padding: 2px 4px;
   font: inherit;
@@ -39,9 +39,9 @@
   gap: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #5c4a36;
-  border: 1px solid #6b5a46;
-  color: #fff;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
   font-size: 12px;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .chip .remove:focus-visible {
-  outline: 1px solid #83a7ea;
+  outline: 1px solid var(--focus);
   border-radius: 50%;
 }
 
@@ -69,16 +69,16 @@
   margin: 0;
   padding: 4px 0;
   list-style: none;
-  border: 1px solid #6b5a46;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: #3e3327;
+  background: var(--input-bg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   z-index: 10;
   overflow-y: auto;
 }
 
 .suggestions li + li {
-  border-top: 1px solid #6b5a46;
+  border-top: 1px solid var(--border);
 }
 
 .suggestions button {
@@ -90,14 +90,14 @@
   padding: 6px 10px;
   border: none;
   background: transparent;
-  color: #fff;
+  color: var(--text);
   text-align: left;
   cursor: pointer;
 }
 
 .suggestions button:hover,
 .suggestions button:focus-visible {
-  background: #5c4a36;
+  background: var(--surface-2);
   outline: none;
 }
 
@@ -108,5 +108,14 @@
 
 .suggestions .secondary {
   font-size: 11px;
-  color: #c3b4a3;
+  color: var(--text-muted);
+}
+
+:host-context([data-design='b']) .control {
+  min-height: 42px;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+:host-context([data-design='b']) .chip {
+  padding: 4px 10px;
 }

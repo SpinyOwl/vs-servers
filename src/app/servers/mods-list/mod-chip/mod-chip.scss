@@ -1,6 +1,6 @@
 :host {
   display: contents;
-  --border-radius: 4px;
+  --border-radius: var(--chip-radius);
 }
 
 .mod-chip {
@@ -12,26 +12,27 @@
   background: transparent;
   padding: 0;
   text-decoration: none;
-  font-size: 12px;
+  font-size: var(--chip-font);
   color: inherit;
 }
 
 .mod-chip:focus-visible {
-  outline: 2px solid #83a7ea;
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
 .mod-chip-name {
-  background: #373737;
-  color: #fff;
-  padding: 3px 6px;
+  background: var(--chip-name-bg);
+  color: var(--chip-name-fg);
+  padding: var(--chip-pad);
   border-radius: var(--border-radius) 0 0 var(--border-radius);
 }
 
 .mod-chip-version {
-  background: #1143a1;
-  color: #fff;
-  padding: 3px 6px;
+  background: var(--chip-ver-bg);
+  color: var(--chip-ver-fg);
+  padding: var(--chip-pad);
+  font-weight: 500;
   border-radius: 0 var(--border-radius) var(--border-radius) 0;
 }
 

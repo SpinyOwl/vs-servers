@@ -15,3 +15,18 @@
 
   padding-top: 1rem;
 }
+
+/* Variant B: natural page scroll so cards work well on phones */
+:host-context([data-design='b']) {
+  height: auto;
+  max-height: none;
+  min-height: 100vh;
+
+  .page-wrapper {
+    padding-bottom: 2rem;
+  }
+}
+
+:host-context([data-design='a']) .page-wrapper {
+  padding-top: 0.5rem;
+}
