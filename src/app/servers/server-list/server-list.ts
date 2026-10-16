@@ -180,6 +180,7 @@ export class ServerList {
     );
     this.debouncedName = debounced;
 
+    let lastSaved: string | null = null;
     effect(() => {
       if (!this.route || !this.router) {
         return;
@@ -205,7 +206,12 @@ export class ServerList {
       for (const key of FILTER_PARAM_KEYS) {
         if (nextParams[key] !== undefined) stored[key] = nextParams[key];
       }
-      saveStoredFilters(getStorage(), stored);
+      // Only touch localStorage when the filters themselves changed (not on paging/sorting).
+      const serialized = JSON.stringify(stored);
+      if (serialized !== lastSaved) {
+        lastSaved = serialized;
+        saveStoredFilters(getStorage(), stored);
+      }
 
       if (this.queryParamsChanged(currentParams, nextParams)) {
         this.router.navigate([], {
@@ -289,8 +295,9 @@ export class ServerList {
       touched = true;
     }
 
-    const version = params.get('version');
-    if (version !== null && this.filterVersion() !== version) {
+    // A filter missing from the URL means "not set", so back/forward navigation clears it too.
+    const version = params.get('version') ?? '';
+    if (this.filterVersion() !== version) {
       this.filterVersion.set(version);
       touched = true;
     }
@@ -308,31 +315,31 @@ export class ServerList {
     }
 
     const freeSlots = this.normalizeBooleanParam(params.get('freeSlots')) === 'true';
-    if (params.has('freeSlots') && this.filterFreeSlots() !== freeSlots) {
+    if (this.filterFreeSlots() !== freeSlots) {
       this.filterFreeSlots.set(freeSlots);
       touched = true;
     }
 
     const online = this.normalizeBooleanParam(params.get('online')) === 'true';
-    if (params.has('online') && this.filterOnline() !== online) {
+    if (this.filterOnline() !== online) {
       this.filterOnline.set(online);
       touched = true;
     }
 
-    const modded = this.normalizeBooleanParam(params.get('modded'));
-    if (modded !== null && this.filterModded() !== modded) {
+    const modded = this.normalizeBooleanParam(params.get('modded')) ?? '';
+    if (this.filterModded() !== modded) {
       this.filterModded.set(modded);
       touched = true;
     }
 
-    const hasPassword = this.normalizeBooleanParam(params.get('hasPassword'));
-    if (hasPassword !== null && this.filterHasPassword() !== hasPassword) {
+    const hasPassword = this.normalizeBooleanParam(params.get('hasPassword')) ?? '';
+    if (this.filterHasPassword() !== hasPassword) {
       this.filterHasPassword.set(hasPassword);
       touched = true;
     }
 
-    const whitelisted = this.normalizeBooleanParam(params.get('whitelisted'));
-    if (whitelisted !== null && this.filterWhitelisted() !== whitelisted) {
+    const whitelisted = this.normalizeBooleanParam(params.get('whitelisted')) ?? '';
+    if (this.filterWhitelisted() !== whitelisted) {
       this.filterWhitelisted.set(whitelisted);
       touched = true;
     }

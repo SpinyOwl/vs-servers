@@ -63,8 +63,17 @@ export function compareVersions(a: string, b: string): number {
   for (let i = 0; i < len; i++) {
     const x = ta[i];
     const y = tb[i];
-    if (x === undefined) return isNum(y) ? (Number(y) === 0 ? 0 : -1) : 1;
-    if (y === undefined) return isNum(x) ? (Number(x) === 0 ? 0 : 1) : -1;
+    // A missing token counts as 0 against a number, and as "release" against a pre-release tag.
+    if (x === undefined) {
+      if (!isNum(y)) return 1;
+      if (Number(y) !== 0) return -1;
+      continue;
+    }
+    if (y === undefined) {
+      if (!isNum(x)) return -1;
+      if (Number(x) !== 0) return 1;
+      continue;
+    }
     if (isNum(x) && isNum(y)) {
       const d = Number(x) - Number(y);
       if (d !== 0) return d < 0 ? -1 : 1;

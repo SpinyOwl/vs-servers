@@ -39,6 +39,11 @@ describe('compareVersions', () => {
     expect(compareVersions('1.20.1', '1.20.1')).toBe(0);
   });
 
+  it('keeps comparing after zero padding', () => {
+    expect(compareVersions('1.20', '1.20.0.1')).toBe(-1);
+    expect(compareVersions('1.20.0.1', '1.20')).toBe(1);
+  });
+
   it('sorts pre-releases below the release', () => {
     expect(compareVersions('1.20.0-rc.1', '1.20.0')).toBe(-1);
     expect(compareVersions('1.20.0', '1.20.0-rc.1')).toBe(1);
