@@ -5,7 +5,7 @@
   <button class="btn" (click)="prev()" [disabled]="currentPage() <= 1">Prev</button>
   <span class="muted">Page {{ currentPage() }} / {{ pages() }}</span>
   <button class="btn" (click)="next()" [disabled]="currentPage() >= pages()">Next</button>
-  <select (ngModelChange)="setPageSize($event)" [ngModel]="pageSize()" class="select">
+  <select (ngModelChange)="setPageSize($event)" [ngModel]="pageSize()" class="select" aria-label="Servers per page">
     <option [ngValue]="10">10 / page</option>
     <option [ngValue]="20">20 / page</option>
     <option [ngValue]="50">50 / page</option>
@@ -48,6 +48,7 @@
           [(ngModel)]="filterName"
           class="input"
           placeholder="Filter by server name…"
+          aria-label="Filter by server name"
         />
       </th>
       <th></th>
@@ -62,21 +63,21 @@
       </th>
       <th></th>
       <th class="bool-col">
-        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterHasPassword" class="select">
+        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterHasPassword" class="select" aria-label="Filter by password">
           <option [ngValue]="''">All passwords</option>
           <option [ngValue]="'true'">Has password</option>
           <option [ngValue]="'false'">No password</option>
         </select>
       </th>
       <th class="bool-col">
-        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterWhitelisted" class="select">
+        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterWhitelisted" class="select" aria-label="Filter by whitelist">
           <option [ngValue]="''">All access</option>
           <option [ngValue]="'true'">Whitelisted</option>
           <option [ngValue]="'false'">Not whitelisted</option>
         </select>
       </th>
       <th class="game-version">
-        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterVersion" class="select">
+        <select (ngModelChange)="page.set(1)" [(ngModel)]="filterVersion" class="select" aria-label="Filter by game version">
           <option [ngValue]="''">All versions</option>
           @for (v of versions(); track v) {
             <option [ngValue]="v">{{ v }}</option>
@@ -85,37 +86,37 @@
       </th>
     </tr>
     <tr class="columns">
-      <th (click)="sortBy('serverName')">
+      <th tabindex="0" role="columnheader" [attr.aria-sort]="sortColumn() === 'serverName' ? (sortAsc() ? 'ascending' : 'descending') : null" (click)="sortBy('serverName')" (keydown.enter)="sortBy('serverName')" (keydown.space)="$event.preventDefault(); sortBy('serverName')">
         Server
         @if (sortColumn() === 'serverName') {
           <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
         }
       </th>
-      <th class="description" (click)="sortBy('gameDescription')">
+      <th class="description" tabindex="0" role="columnheader" [attr.aria-sort]="sortColumn() === 'gameDescription' ? (sortAsc() ? 'ascending' : 'descending') : null" (click)="sortBy('gameDescription')" (keydown.enter)="sortBy('gameDescription')" (keydown.space)="$event.preventDefault(); sortBy('gameDescription')">
         Description
         @if (sortColumn() === 'gameDescription') {
           <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
         }
       </th>
-      <th (click)="sortBy('mods')">
+      <th tabindex="0" role="columnheader" [attr.aria-sort]="sortColumn() === 'mods' ? (sortAsc() ? 'ascending' : 'descending') : null" (click)="sortBy('mods')" (keydown.enter)="sortBy('mods')" (keydown.space)="$event.preventDefault(); sortBy('mods')">
         Mods
         @if (sortColumn() === 'mods') {
           <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
         }
       </th>
-      <th (click)="sortBy('players')">
+      <th tabindex="0" role="columnheader" [attr.aria-sort]="sortColumn() === 'players' ? (sortAsc() ? 'ascending' : 'descending') : null" (click)="sortBy('players')" (keydown.enter)="sortBy('players')" (keydown.space)="$event.preventDefault(); sortBy('players')">
         Players
         @if (sortColumn() === 'players') {
           <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
         }
       </th>
       <th class="bool-col">
-        <span class="material-symbols-outlined">key_vertical</span>
+        <span class="material-symbols-outlined" title="Password required" aria-label="Password required">key_vertical</span>
       </th>
       <th class="bool-col">
-        <span class="material-symbols-outlined">list_alt_check</span>
+        <span class="material-symbols-outlined" title="Whitelisted" aria-label="Whitelisted">list_alt_check</span>
       </th>
-      <th class="game-version" (click)="sortBy('gameVersion')">
+      <th class="game-version" tabindex="0" role="columnheader" [attr.aria-sort]="sortColumn() === 'gameVersion' ? (sortAsc() ? 'ascending' : 'descending') : null" (click)="sortBy('gameVersion')" (keydown.enter)="sortBy('gameVersion')" (keydown.space)="$event.preventDefault(); sortBy('gameVersion')">
         Game version
         @if (sortColumn() === 'gameVersion') {
           <span class="sort">{{ sortAsc() ? '▲' : '▼' }}</span>
@@ -126,32 +127,32 @@
     <tbody>
       @for (s of paged(); track s.serverIP) {
         <tr>
-          <td>
+          <td class="c-name" data-label="Server">
             <div class="server-name">
               {{ s.serverName || '—' }}
-              <a href="vintagestoryjoin://{{ s.serverIP }}">
+              <a href="vintagestoryjoin://{{ s.serverIP }}" class="join" title="Join server" aria-label="Join {{ s.serverName }}">
                 <span class="material-symbols-outlined">open_in_new</span>
               </a>
             </div>
           </td>
-          <td>
+          <td class="c-desc" data-label="Description">
             <div class="description">
               @if (s.gameDescription) {
                 <div [innerHTML]="s.gameDescription"></div>
               }
             </div>
           </td>
-          <td>
+          <td class="c-mods" data-label="Mods">
             <app-mods-list [mods]="s.mods" (modSelected)="modSelected.emit($event)"></app-mods-list>
           </td>
-          <td>{{ s.players }} / {{ s.maxPlayers }}</td>
-          <td class="bool-col">
-            <span class="material-symbols-outlined">{{ s.hasPassword ? 'check' : 'close' }}</span>
+          <td class="c-players" data-label="Players"><span class="material-symbols-outlined cell-icon" aria-hidden="true">group</span>{{ s.players }} / {{ s.maxPlayers }}</td>
+          <td class="bool-col c-pw" data-label="Password" [class.on]="s.hasPassword">
+            <span class="material-symbols-outlined" [attr.aria-label]="s.hasPassword ? 'Password required' : 'No password'">{{ s.hasPassword ? 'check' : 'close' }}</span>
           </td>
-          <td class="bool-col">
-            <span class="material-symbols-outlined">{{ s.whitelisted ? 'check' : 'close' }}</span>
+          <td class="bool-col c-wl" data-label="Whitelist" [class.on]="s.whitelisted">
+            <span class="material-symbols-outlined" [attr.aria-label]="s.whitelisted ? 'Whitelisted' : 'Not whitelisted'">{{ s.whitelisted ? 'check' : 'close' }}</span>
           </td>
-          <td class="game-version">
+          <td class="game-version c-ver" data-label="Version">
             <span class="chip">{{ s.gameVersion || '—' }}</span>
           </td>
         </tr>

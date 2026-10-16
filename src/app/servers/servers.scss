@@ -3,6 +3,7 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  padding: 0 12px;
 }
 
 .actions {
@@ -22,15 +23,68 @@
 }
 
 .info {
-  color: #2f6fed;
+  color: var(--info);
 }
 
 .error {
-  color: #c0392b;
+  color: var(--error);
 }
 
 @media (max-width: 1400px) {
   .servers-layout {
     flex-direction: column;
+  }
+}
+
+/* A: tighter chrome */
+:host-context([data-design='a']) {
+  .actions {
+    margin-bottom: 4px;
+  }
+}
+
+/* B: the page itself scrolls (cards), no nested scroll area */
+:host-context([data-design='b']) {
+  .servers-layout {
+    height: auto;
+    flex: 0 0 auto;
+  }
+  .actions .btn {
+    min-height: 40px;
+    border-radius: 10px;
+    padding: 8px 16px;
+  }
+
+  /* wide screens: mod details is a sticky column next to the cards, the list shrinks */
+  @media (min-width: 1000px) {
+    .servers-layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    app-server-list {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    app-mod-pane {
+      position: sticky;
+      top: 12px;
+      flex: 0 0 420px;
+      width: 420px;
+      height: calc(100vh - 24px);
+    }
+  }
+
+  /* narrow screens: slide-over drawer, since there is no room for a column */
+  @media (max-width: 999px) {
+    app-mod-pane {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10000;
+      width: min(480px, 100vw);
+      flex: none;
+      box-shadow: -12px 0 32px rgba(0, 0, 0, 0.35);
+    }
   }
 }

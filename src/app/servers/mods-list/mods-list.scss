@@ -5,4 +5,20 @@
   height: 62px;
   overflow: auto;
   max-width: 400px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+:host-context([data-design='a']) .mods {
+  height: auto;
+  max-height: 48px;
+  max-width: 460px;
+  gap: 3px;
+}
+
+:host-context([data-design='b']) .mods {
+  height: auto;
+  max-height: 168px;
+  max-width: none;
+  gap: 8px;
 }

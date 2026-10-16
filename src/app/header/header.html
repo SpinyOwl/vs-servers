@@ -1,6 +1,28 @@
 <header class="header">
   <h1 class="title"><a href="/">Vintage Story — Public Servers</a></h1>
-  <nav class="top-right">
+  <nav class="top-right" aria-label="Site">
+    <div class="design-switch" role="group" aria-label="Design variant">
+      @for (d of designs; track d.id) {
+        <button
+          type="button"
+          class="seg"
+          [class.active]="design() === d.id"
+          [attr.aria-pressed]="design() === d.id"
+          [title]="d.title"
+          (click)="setDesign(d.id)"
+        >{{ d.label }}</button>
+      }
+    </div>
+    <button
+      type="button"
+      class="btn theme-toggle"
+      (click)="toggleTheme()"
+      [attr.aria-label]="'Theme: ' + theme() + '. Click to change'"
+      [title]="'Theme: ' + theme()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">palette</span>
+      <span class="theme-name">{{ theme() }}</span>
+    </button>
     <a href="mailto:contact@spinyowl.com" class="btn">Contact</a>
     <a routerLink="/feedback" class="btn">Feedback</a>
   </nav>
