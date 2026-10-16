@@ -65,7 +65,7 @@
       @for (f of activeFilters(); track f.id) {
         <span class="active-chip">
           {{ f.label }}
-          <button type="button" (click)="removeFilter(f.id)" [attr.aria-label]="'Remove filter ' + f.label">×</button>
+          <button type="button" (click)="removeFilter(f)" [attr.aria-label]="'Remove filter ' + f.label">×</button>
         </span>
       }
       <button class="btn" type="button" (click)="resetFilters()">Reset filters</button>

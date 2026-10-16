@@ -53,7 +53,7 @@ describe('ServerList', () => {
     comp.filterFreeSlots.set(true);
     expect(comp.filtered().length).toBe(1);
     expect(comp.activeFilters().map((f) => f.id)).toEqual(['free']);
-    comp.removeFilter('free');
+    comp.removeFilter(comp.activeFilters()[0]);
     expect(comp.filtered().length).toBe(2);
     comp.filterOnline.set(true);
     comp.filterModded.set('true');

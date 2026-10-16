@@ -4,7 +4,7 @@ import {ModsList} from '../mods-list/mods-list';
 import {ModFilter} from './mod-filter/mod-filter';
 import {VsMod, VsServer} from '../../../services/servers.service';
 import {ActivatedRoute, ParamMap, Params, Router, convertToParamMap} from '@angular/router';
-import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {debounceTime, distinctUntilChanged} from 'rxjs';
 
 import {
@@ -25,6 +25,7 @@ const FILTER_PARAM_KEYS = [
 export interface ActiveFilter {
   id: string;
   label: string;
+  remove: () => void;
 }
 
 function getStorage(): Storage | null {
@@ -68,7 +69,7 @@ export class ServerList {
   sortAsc = signal<boolean>(false);
 
   // Debounced copy of the name filter: typing stays instant, filtering/URL sync run after a pause.
-  private debouncedName!: () => string;
+  private readonly debouncedName = signal<string>('');
 
   versions = computed(() => {
     const list = this.servers()
@@ -103,22 +104,27 @@ export class ServerList {
 
   activeFilters = computed<ActiveFilter[]>(() => {
     const result: ActiveFilter[] = [];
+    const add = (id: string, label: string, remove: () => void) => result.push({id, label, remove});
     const name = this.filterName().trim();
-    if (name) result.push({id: 'name', label: `Name: ${name}`});
-    if (this.filterVersion()) result.push({id: 'version', label: `Version: ${this.filterVersion()}`});
-    for (const m of this.filterMods()) result.push({id: 'mod:' + m, label: `Mod: ${m}`});
-    for (const m of this.filterExcludeMods()) result.push({id: 'exclude:' + m, label: `Without mod: ${m}`});
+    if (name) add('name', `Name: ${name}`, () => this.clearName());
+    if (this.filterVersion()) add('version', `Version: ${this.filterVersion()}`, () => this.filterVersion.set(''));
+    for (const m of this.filterMods()) {
+      add('mod:' + m, `Mod: ${m}`, () => this.filterMods.update((l) => l.filter((x) => x !== m)));
+    }
+    for (const m of this.filterExcludeMods()) {
+      add('exclude:' + m, `Without mod: ${m}`, () => this.filterExcludeMods.update((l) => l.filter((x) => x !== m)));
+    }
     if (this.filterModded()) {
-      result.push({id: 'modded', label: this.filterModded() === 'true' ? 'With mods' : 'Vanilla only'});
+      add('modded', this.filterModded() === 'true' ? 'With mods' : 'Vanilla only', () => this.filterModded.set(''));
     }
     if (this.filterHasPassword()) {
-      result.push({id: 'pw', label: this.filterHasPassword() === 'true' ? 'Has password' : 'No password'});
+      add('pw', this.filterHasPassword() === 'true' ? 'Has password' : 'No password', () => this.filterHasPassword.set(''));
     }
     if (this.filterWhitelisted()) {
-      result.push({id: 'wl', label: this.filterWhitelisted() === 'true' ? 'Whitelisted' : 'Not whitelisted'});
+      add('wl', this.filterWhitelisted() === 'true' ? 'Whitelisted' : 'Not whitelisted', () => this.filterWhitelisted.set(''));
     }
-    if (this.filterFreeSlots()) result.push({id: 'free', label: 'Free slots'});
-    if (this.filterOnline()) result.push({id: 'online', label: 'Online now'});
+    if (this.filterFreeSlots()) add('free', 'Free slots', () => this.filterFreeSlots.set(false));
+    if (this.filterOnline()) add('online', 'Online now', () => this.filterOnline.set(false));
     return result;
   });
 
@@ -174,11 +180,10 @@ export class ServerList {
       }
     }
 
-    const debounced = toSignal(
-      toObservable(this.filterName).pipe(debounceTime(200), distinctUntilChanged()),
-      {initialValue: this.filterName()}
-    );
-    this.debouncedName = debounced;
+    this.debouncedName.set(this.filterName());
+    toObservable(this.filterName)
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => this.debouncedName.set(value));
 
     let lastSaved: string | null = null;
     effect(() => {
@@ -189,7 +194,7 @@ export class ServerList {
       const currentParams = this.route.snapshot.queryParams;
       const nextParams: Params = {...currentParams};
 
-      this.writeStringParam(nextParams, 'name', debounced());
+      this.writeStringParam(nextParams, 'name', this.debouncedName());
       this.writeStringParam(nextParams, 'version', this.filterVersion());
       this.writeStringArrayParam(nextParams, 'mod', this.filterMods());
       this.writeBooleanParam(nextParams, 'hasPassword', this.filterHasPassword());
@@ -239,8 +244,14 @@ export class ServerList {
     this.page.set(1);
   }
 
-  resetFilters() {
+  // Programmatic clears skip the typing debounce so the list and URL update at once.
+  private clearName() {
     this.filterName.set('');
+    this.debouncedName.set('');
+  }
+
+  resetFilters() {
+    this.clearName();
     this.filterVersion.set('');
     this.filterMods.set([]);
     this.filterExcludeMods.set([]);
@@ -252,18 +263,8 @@ export class ServerList {
     this.page.set(1);
   }
 
-  removeFilter(id: string) {
-    if (id === 'name') this.filterName.set('');
-    else if (id === 'version') this.filterVersion.set('');
-    else if (id === 'modded') this.filterModded.set('');
-    else if (id === 'pw') this.filterHasPassword.set('');
-    else if (id === 'wl') this.filterWhitelisted.set('');
-    else if (id === 'free') this.filterFreeSlots.set(false);
-    else if (id === 'online') this.filterOnline.set(false);
-    else if (id.startsWith('mod:')) this.filterMods.update((l) => l.filter((m) => m !== id.slice(4)));
-    else if (id.startsWith('exclude:')) {
-      this.filterExcludeMods.update((l) => l.filter((m) => m !== id.slice(8)));
-    }
+  removeFilter(filter: ActiveFilter) {
+    filter.remove();
     this.page.set(1);
   }
 
@@ -289,7 +290,7 @@ export class ServerList {
 
     const name = params.get('name');
     // Ignore the (stale) URL value while a debounced edit of the name input is still pending.
-    const namePending = !!this.debouncedName && this.debouncedName() !== this.filterName();
+    const namePending = this.debouncedName() !== this.filterName();
     if (name !== null && !namePending && this.filterName() !== name) {
       this.filterName.set(name);
       touched = true;
