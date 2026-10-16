@@ -14,6 +14,20 @@
       </span>
     }
 
+    @for (mod of excludedMods(); track mod) {
+      <span class="chip exclude">
+        −{{ mod }}
+        <button
+          type="button"
+          class="remove"
+          (click)="removeExcludedClicked($event, mod)"
+          aria-label="Remove excluded mod {{ mod }}"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </span>
+    }
+
     <input
       #inputElement
       type="text"
@@ -22,7 +36,8 @@
       (keydown)="onKeydown($event)"
       (focus)="onFocus()"
       (blur)="onBlur()"
-      [placeholder]="mods().length ? '' : placeholder()"
+      [placeholder]="mods().length || excludedMods().length ? '' : placeholder()"
+      title="Prefix with - to exclude a mod"
       autocomplete="off"
       aria-label="Filter by mod id"
     />

@@ -13,6 +13,31 @@
   </select>
 </div>
 
+<div class="quick-filters">
+  <label class="toggle">
+    <input type="checkbox" [ngModel]="filterFreeSlots()" (ngModelChange)="filterFreeSlots.set($event); page.set(1)"/>
+    Free slots
+  </label>
+  <label class="toggle">
+    <input type="checkbox" [ngModel]="filterOnline()" (ngModelChange)="filterOnline.set($event); page.set(1)"/>
+    Online now
+  </label>
+  <select (ngModelChange)="page.set(1)" [(ngModel)]="filterModded" class="select" aria-label="Mods">
+    <option [ngValue]="''">Any mods</option>
+    <option [ngValue]="'false'">Vanilla only</option>
+    <option [ngValue]="'true'">With mods</option>
+  </select>
+  @for (f of activeFilters(); track f.id) {
+    <span class="active-chip">
+      {{ f.label }}
+      <button type="button" (click)="removeFilter(f.id)" [attr.aria-label]="'Remove filter ' + f.label">×</button>
+    </span>
+  }
+  @if (activeFilters().length) {
+    <button class="btn" type="button" (click)="resetFilters()">Reset filters</button>
+  }
+</div>
+
 <div class="tableWrap">
   <table>
     <thead>
@@ -30,6 +55,8 @@
         <app-mod-filter
           [mods]="filterMods()"
           (modsChange)="onFilterModsChange($event)"
+          [excludedMods]="filterExcludeMods()"
+          (excludedModsChange)="onFilterExcludeModsChange($event)"
           placeholder="Filter by mod id…"
         ></app-mod-filter>
       </th>

@@ -24,7 +24,9 @@ interface ModSuggestionViewModel {
 export class ModFilter {
   mods = input<string[]>([]);
   placeholder = input<string>('Filter by mod id…');
+  excludedMods = input<string[]>([]);
   modsChange = output<string[]>();
+  excludedModsChange = output<string[]>();
 
   @ViewChild('inputElement') private readonly inputElement?: ElementRef<HTMLInputElement>;
 
@@ -37,14 +39,21 @@ export class ModFilter {
 
   readonly query = signal<string>('');
 
+  // A leading "-" switches the typed value to exclude mode ("-foo" = servers without foo).
+  private readonly parsedQuery = computed(() => {
+    const raw = this.query().trim();
+    const exclude = raw.startsWith('-');
+    return {exclude, text: (exclude ? raw.slice(1) : raw).trim()};
+  });
+
   readonly suggestions = computed<ModSuggestionViewModel[]>(() => {
-    const q = this.query().trim().toLowerCase();
+    const q = this.parsedQuery().text.toLowerCase();
     if (!q) {
       return [];
     }
 
     const selected = new Set(
-      this.mods()
+      [...this.mods(), ...this.excludedMods()]
         .map((value) => value.trim().toLowerCase())
         .filter((value) => value.length > 0)
     );
@@ -60,7 +69,7 @@ export class ModFilter {
   });
 
   readonly showSuggestions = computed<boolean>(() => {
-    return this.focused() && this.query().trim().length > 0 && this.suggestions().length > 0;
+    return this.focused() && this.parsedQuery().text.length > 0 && this.suggestions().length > 0;
   });
 
   constructor() {
@@ -102,8 +111,12 @@ export class ModFilter {
     }
 
     if (event.key === 'Backspace' && !this.query().trim().length) {
+      const excluded = this.excludedMods();
       const current = this.mods();
-      if (current.length > 0) {
+      if (excluded.length > 0) {
+        event.preventDefault();
+        this.removeExcluded(excluded[excluded.length - 1]);
+      } else if (current.length > 0) {
         event.preventDefault();
         this.removeMod(current[current.length - 1]);
       }
@@ -124,7 +137,7 @@ export class ModFilter {
   }
 
   selectSuggestion(value: string) {
-    this.addMod(value);
+    this.addMod(value, this.parsedQuery().exclude);
   }
 
   removeMod(value: string) {
@@ -135,6 +148,20 @@ export class ModFilter {
     }
   }
 
+  removeExcluded(value: string) {
+    const normalized = value.trim().toLowerCase();
+    const next = this.excludedMods().filter((item) => item.trim().toLowerCase() !== normalized);
+    if (next.length !== this.excludedMods().length) {
+      this.excludedModsChange.emit(next);
+    }
+  }
+
+  removeExcludedClicked(event: MouseEvent, value: string) {
+    event.stopPropagation();
+    this.removeExcluded(value);
+    this.focusInput();
+  }
+
   removeModClicked(event: MouseEvent, value: string) {
     event.stopPropagation();
     this.removeMod(value);
@@ -142,11 +169,11 @@ export class ModFilter {
   }
 
   commitQuery() {
-    const value = this.query().trim();
-    this.addMod(value);
+    const {exclude, text} = this.parsedQuery();
+    this.addMod(text, exclude);
   }
 
-  private addMod(raw: string) {
+  private addMod(raw: string, exclude = false) {
     const value = raw.trim();
     if (!value) {
       this.query.set('');
@@ -154,13 +181,20 @@ export class ModFilter {
     }
 
     const normalized = value.toLowerCase();
-    const current = this.mods();
-    if (current.some((item) => item.trim().toLowerCase() === normalized)) {
+    const has = (list: string[]) => list.some((item) => item.trim().toLowerCase() === normalized);
+    const same = exclude ? this.excludedMods() : this.mods();
+    const other = exclude ? this.mods() : this.excludedMods();
+    if (has(same)) {
       this.query.set('');
       return;
     }
 
-    this.modsChange.emit([...current, value]);
+    // A mod can be required or excluded, not both.
+    if (has(other)) {
+      const kept = other.filter((item) => item.trim().toLowerCase() !== normalized);
+      (exclude ? this.modsChange : this.excludedModsChange).emit(kept);
+    }
+    (exclude ? this.excludedModsChange : this.modsChange).emit([...same, value]);
     this.query.set('');
     this.focusInput();
   }

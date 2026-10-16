@@ -3,16 +3,36 @@ import {FormsModule} from '@angular/forms';
 import {ModsList} from '../mods-list/mods-list';
 import {ModFilter} from './mod-filter/mod-filter';
 import {VsMod, VsServer} from '../../../services/servers.service';
-import {ActivatedRoute, ParamMap, Params, Router} from '@angular/router';
+import {ActivatedRoute, ParamMap, Params, Router, convertToParamMap} from '@angular/router';
 import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {debounceTime, distinctUntilChanged} from 'rxjs';
 
+import {
+  ServerFilterCriteria,
+  compareVersions,
+  indexServer,
+  loadStoredFilters,
+  matchesServer,
+  saveStoredFilters,
+} from './server-filters';
+
 const collator = new Intl.Collator();
 
-interface IndexedServer {
-  server: VsServer;
-  name: string;
-  modIds: string[];
+const FILTER_PARAM_KEYS = [
+  'name', 'version', 'mod', 'excludeMod', 'hasPassword', 'whitelisted', 'freeSlots', 'online', 'modded',
+];
+
+export interface ActiveFilter {
+  id: string;
+  label: string;
+}
+
+function getStorage(): Storage | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage;
+  } catch {
+    return null;
+  }
 }
 
 @Component({
@@ -34,12 +54,18 @@ export class ServerList {
   filterName = signal<string>('');
   filterVersion = signal<string>('');
   filterMods = signal<string[]>([]);
+  filterExcludeMods = signal<string[]>([]);
+  filterFreeSlots = signal<boolean>(false);
+  filterOnline = signal<boolean>(false);
+  // '' = any, 'true' = with mods, 'false' = vanilla only
+  filterModded = signal<string>('');
   filterHasPassword = signal<string>('');
   filterWhitelisted = signal<string>('');
   pageSize = signal<number>(20);
   page = signal<number>(1);
-  sortColumn = signal<string>('');
-  sortAsc = signal<boolean>(true);
+  // Default order (no `sort` in the URL): most players first.
+  sortColumn = signal<string>('players');
+  sortAsc = signal<boolean>(false);
 
   // Debounced copy of the name filter: typing stays instant, filtering/URL sync run after a pause.
   private debouncedName!: () => string;
@@ -48,41 +74,52 @@ export class ServerList {
     const list = this.servers()
       .map((s) => s.gameVersion)
       .filter((v): v is string => !!v);
-    return Array.from(new Set(list)).sort((a, b) => collator.compare(b, a));
+    return Array.from(new Set(list)).sort((a, b) => compareVersions(b, a));
   });
 
   // Lower-cased lookup data is computed once per server list, not once per filter change.
-  private indexed = computed<IndexedServer[]>(() =>
-    this.servers().map((server) => ({
-      server,
-      name: (server.serverName ?? '').toLowerCase(),
-      modIds: (server.mods ?? []).map((m) => m.id.toLowerCase()),
-    }))
-  );
+  private indexed = computed(() => this.servers().map(indexServer));
+
+  private normalizedMods(list: string[]): string[] {
+    return list.map((value) => value.trim().toLowerCase()).filter((value) => value.length > 0);
+  }
 
   filtered = computed(() => {
-    const nameQ = this.debouncedName().trim().toLowerCase();
-    const ver = this.filterVersion().trim();
-    const mods = this.filterMods()
-      .map((value) => value.trim().toLowerCase())
-      .filter((value) => value.length > 0);
-    const hasPw = this.filterHasPassword().trim();
-    const wl = this.filterWhitelisted().trim();
+    const criteria: ServerFilterCriteria = {
+      name: this.debouncedName().trim().toLowerCase(),
+      version: this.filterVersion().trim(),
+      mods: this.normalizedMods(this.filterMods()),
+      excludeMods: this.normalizedMods(this.filterExcludeMods()),
+      hasPassword: this.filterHasPassword().trim(),
+      whitelisted: this.filterWhitelisted().trim(),
+      modded: this.filterModded(),
+      freeSlots: this.filterFreeSlots(),
+      online: this.filterOnline(),
+    };
     return this.indexed()
-      .filter(({server: s, name, modIds}) => {
-        const modMatch =
-          mods.length === 0 || mods.every((mod) => modIds.some((id) => id.includes(mod)));
-        const pwMatch = !hasPw || String(s.hasPassword ?? false) === hasPw;
-        const wlMatch = !wl || String(s.whitelisted ?? false) === wl;
-        return (
-          (!nameQ || name.includes(nameQ)) &&
-          (!ver || s.gameVersion === ver) &&
-          modMatch &&
-          pwMatch &&
-          wlMatch
-        );
-      })
+      .filter((entry) => matchesServer(entry, criteria))
       .map(({server}) => server);
+  });
+
+  activeFilters = computed<ActiveFilter[]>(() => {
+    const result: ActiveFilter[] = [];
+    const name = this.filterName().trim();
+    if (name) result.push({id: 'name', label: `Name: ${name}`});
+    if (this.filterVersion()) result.push({id: 'version', label: `Version: ${this.filterVersion()}`});
+    for (const m of this.filterMods()) result.push({id: 'mod:' + m, label: `Mod: ${m}`});
+    for (const m of this.filterExcludeMods()) result.push({id: 'exclude:' + m, label: `Without mod: ${m}`});
+    if (this.filterModded()) {
+      result.push({id: 'modded', label: this.filterModded() === 'true' ? 'With mods' : 'Vanilla only'});
+    }
+    if (this.filterHasPassword()) {
+      result.push({id: 'pw', label: this.filterHasPassword() === 'true' ? 'Has password' : 'No password'});
+    }
+    if (this.filterWhitelisted()) {
+      result.push({id: 'wl', label: this.filterWhitelisted() === 'true' ? 'Whitelisted' : 'Not whitelisted'});
+    }
+    if (this.filterFreeSlots()) result.push({id: 'free', label: 'Free slots'});
+    if (this.filterOnline()) result.push({id: 'online', label: 'Online now'});
+    return result;
   });
 
   sorted = computed(() => {
@@ -101,7 +138,7 @@ export class ServerList {
           case 'players':
             return (a.players || 0) - (b.players || 0);
           case 'gameVersion':
-            return collator.compare(a.gameVersion || '', b.gameVersion || '');
+            return compareVersions(a.gameVersion || '', b.gameVersion || '');
           default:
             return 0;
         }
@@ -126,6 +163,15 @@ export class ServerList {
       this.route.queryParamMap
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((params) => this.applyQueryParams(params));
+
+      // Nothing filter-related in the URL: fall back to the filters used last time.
+      const urlParams = this.route.snapshot.queryParamMap;
+      if (!FILTER_PARAM_KEYS.some((key) => urlParams.has(key))) {
+        const stored = loadStoredFilters(getStorage());
+        if (FILTER_PARAM_KEYS.some((key) => key in stored)) {
+          this.applyQueryParams(convertToParamMap({...stored, ...this.sortQueryParams(urlParams)}));
+        }
+      }
     }
 
     const debounced = toSignal(
@@ -147,9 +193,19 @@ export class ServerList {
       this.writeStringArrayParam(nextParams, 'mod', this.filterMods());
       this.writeBooleanParam(nextParams, 'hasPassword', this.filterHasPassword());
       this.writeBooleanParam(nextParams, 'whitelisted', this.filterWhitelisted());
+      this.writeStringArrayParam(nextParams, 'excludeMod', this.filterExcludeMods());
+      this.writeBooleanParam(nextParams, 'freeSlots', this.filterFreeSlots() ? 'true' : '');
+      this.writeBooleanParam(nextParams, 'online', this.filterOnline() ? 'true' : '');
+      this.writeBooleanParam(nextParams, 'modded', this.filterModded());
       this.writeNumberParam(nextParams, 'pageSize', this.pageSize(), 20);
       this.writeNumberParam(nextParams, 'page', this.currentPage(), 1);
       this.writeSortParams(nextParams, this.sortColumn(), this.sortAsc());
+
+      const stored: Record<string, string | string[]> = {};
+      for (const key of FILTER_PARAM_KEYS) {
+        if (nextParams[key] !== undefined) stored[key] = nextParams[key];
+      }
+      saveStoredFilters(getStorage(), stored);
 
       if (this.queryParamsChanged(currentParams, nextParams)) {
         this.router.navigate([], {
@@ -169,6 +225,39 @@ export class ServerList {
 
   onFilterModsChange(mods: string[]) {
     this.filterMods.set(mods);
+    this.page.set(1);
+  }
+
+  onFilterExcludeModsChange(mods: string[]) {
+    this.filterExcludeMods.set(mods);
+    this.page.set(1);
+  }
+
+  resetFilters() {
+    this.filterName.set('');
+    this.filterVersion.set('');
+    this.filterMods.set([]);
+    this.filterExcludeMods.set([]);
+    this.filterHasPassword.set('');
+    this.filterWhitelisted.set('');
+    this.filterModded.set('');
+    this.filterFreeSlots.set(false);
+    this.filterOnline.set(false);
+    this.page.set(1);
+  }
+
+  removeFilter(id: string) {
+    if (id === 'name') this.filterName.set('');
+    else if (id === 'version') this.filterVersion.set('');
+    else if (id === 'modded') this.filterModded.set('');
+    else if (id === 'pw') this.filterHasPassword.set('');
+    else if (id === 'wl') this.filterWhitelisted.set('');
+    else if (id === 'free') this.filterFreeSlots.set(false);
+    else if (id === 'online') this.filterOnline.set(false);
+    else if (id.startsWith('mod:')) this.filterMods.update((l) => l.filter((m) => m !== id.slice(4)));
+    else if (id.startsWith('exclude:')) {
+      this.filterExcludeMods.update((l) => l.filter((m) => m !== id.slice(8)));
+    }
     this.page.set(1);
   }
 
@@ -212,6 +301,30 @@ export class ServerList {
       touched = true;
     }
 
+    const excludeMods = this.normalizeModParams(params.getAll('excludeMod'));
+    if (!this.arraysEqual(this.filterExcludeMods(), excludeMods)) {
+      this.filterExcludeMods.set(excludeMods);
+      touched = true;
+    }
+
+    const freeSlots = this.normalizeBooleanParam(params.get('freeSlots')) === 'true';
+    if (params.has('freeSlots') && this.filterFreeSlots() !== freeSlots) {
+      this.filterFreeSlots.set(freeSlots);
+      touched = true;
+    }
+
+    const online = this.normalizeBooleanParam(params.get('online')) === 'true';
+    if (params.has('online') && this.filterOnline() !== online) {
+      this.filterOnline.set(online);
+      touched = true;
+    }
+
+    const modded = this.normalizeBooleanParam(params.get('modded'));
+    if (modded !== null && this.filterModded() !== modded) {
+      this.filterModded.set(modded);
+      touched = true;
+    }
+
     const hasPassword = this.normalizeBooleanParam(params.get('hasPassword'));
     if (hasPassword !== null && this.filterHasPassword() !== hasPassword) {
       this.filterHasPassword.set(hasPassword);
@@ -249,24 +362,12 @@ export class ServerList {
     }
 
     const sort = params.get('sort');
-    if (sort !== null) {
-      if (this.sortColumn() !== sort) {
-        this.sortColumn.set(sort);
-      }
-    } else if (this.sortColumn()) {
-      this.sortColumn.set('');
-    }
-
     const dir = params.get('dir');
-    if (dir !== null) {
-      const normalized = dir.trim().toLowerCase();
-      const asc = normalized !== 'desc';
-      if (this.sortAsc() !== asc) {
-        this.sortAsc.set(asc);
-      }
-    } else if (!this.sortAsc()) {
-      this.sortAsc.set(true);
-    }
+    // No `sort` means the default order (players, descending).
+    const nextColumn = sort !== null ? sort : 'players';
+    const nextAsc = sort !== null ? dir?.trim().toLowerCase() !== 'desc' : false;
+    if (this.sortColumn() !== nextColumn) this.sortColumn.set(nextColumn);
+    if (this.sortAsc() !== nextAsc) this.sortAsc.set(nextAsc);
 
     if (touched) {
       this.page.set(1);
@@ -346,9 +447,18 @@ export class ServerList {
     }
   }
 
+  private sortQueryParams(params: ParamMap): Params {
+    const result: Params = {};
+    for (const key of ['sort', 'dir']) {
+      const value = params.get(key);
+      if (value !== null) result[key] = value;
+    }
+    return result;
+  }
+
   private writeSortParams(params: Params, column: string, asc: boolean) {
     const trimmed = column.trim();
-    if (!trimmed) {
+    if (!trimmed || (trimmed === 'players' && !asc)) {
       delete params['sort'];
       delete params['dir'];
       return;
