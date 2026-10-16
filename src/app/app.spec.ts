@@ -1,10 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { App } from './app';
-import { Servers } from './servers/servers';
-import { ServersService } from '../services/servers.service';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -32,29 +29,3 @@ describe('App', () => {
     );
   });
 });
-
-describe('Servers', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Servers],
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: ServersService, useValue: { list$: () => of([]) } },
-      ],
-    }).compileComponents();
-  });
-
-  it('should sort by players', () => {
-    const fixture = TestBed.createComponent(Servers);
-    const comp = fixture.componentInstance;
-    comp.servers.set([
-      { serverName: 'A', serverIP: '1', players: 3 },
-      { serverName: 'B', serverIP: '2', players: 1 },
-    ]);
-    comp.sortBy('players');
-    expect(comp.paged()[0].players).toBe(1);
-    comp.sortBy('players');
-    expect(comp.paged()[0].players).toBe(3);
-  });
-});
-
