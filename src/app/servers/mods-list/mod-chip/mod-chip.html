@@ -7,42 +7,43 @@
   (focus)="onFocus()"
   (blur)="onPointerLeave()"
   #chipButton
-  [attr.aria-label]="(tooltip$ | async)?.label ?? mod.id"
-  [attr.aria-describedby]="tooltipVisible ? tooltipId : null"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-describedby]="tooltipVisible() ? tooltipId : null"
 >
-  <span class="mod-chip-name">{{ mod.id }}</span>
-  <span class="mod-chip-version">{{ mod.version }}</span>
+  <span class="mod-chip-name">{{ mod().id }}</span>
+  <span class="mod-chip-version">{{ mod().version }}</span>
 </button>
 
-@if (tooltipVisible) {
-  @if (tooltip$ | async; as tooltip) {
-    <div
-      #tooltipElement
-      class="mod-chip-tooltip"
-      [class.mod-chip-tooltip--positioned]="tooltipPosition"
-      [style.top.px]="tooltipPosition?.top"
-      [style.left.px]="tooltipPosition?.left"
-      role="tooltip"
-      [attr.id]="tooltipId"
-      aria-live="polite"
-    >
-      @if (tooltip.logoUrl; as logo) {
-        <img class="mod-chip-tooltip-logo" [src]="logo" alt="" />
+@if (tooltipVisible()) {
+  @let tip = tooltip();
+  <div
+    #tooltipElement
+    class="mod-chip-tooltip"
+    [class.mod-chip-tooltip--positioned]="tooltipPosition()"
+    [style.top.px]="tooltipPosition()?.top"
+    [style.left.px]="tooltipPosition()?.left"
+    role="tooltip"
+    [attr.id]="tooltipId"
+    aria-live="polite"
+  >
+    @if (tip.logoUrl; as logo) {
+      <img class="mod-chip-tooltip-logo" [src]="logo" alt="" decoding="async" crossorigin="anonymous" />
+    }
+    <div class="mod-chip-tooltip-content">
+      <div class="mod-chip-tooltip-title">{{ tip.title }}</div>
+      @if (tip.meta) {
+        <div class="mod-chip-tooltip-meta">{{ tip.meta }}</div>
       }
-      <div class="mod-chip-tooltip-content">
-        <div class="mod-chip-tooltip-title">{{ tooltip.title }}</div>
-        @if (tooltip.meta) {
-          <div class="mod-chip-tooltip-meta">{{ tooltip.meta }}</div>
-        }
-        @if (tooltip.summary) {
-          <div class="mod-chip-tooltip-summary">{{ tooltip.summary }}</div>
-        }
-        @if (tooltip.stats.length) {
-          <ul class="mod-chip-tooltip-stats">
-            <li *ngFor="let stat of tooltip.stats">{{ stat }}</li>
-          </ul>
-        }
-      </div>
+      @if (tip.summary) {
+        <div class="mod-chip-tooltip-summary">{{ tip.summary }}</div>
+      }
+      @if (tip.stats.length) {
+        <ul class="mod-chip-tooltip-stats">
+          @for (stat of tip.stats; track stat) {
+            <li>{{ stat }}</li>
+          }
+        </ul>
+      }
     </div>
-  }
+  </div>
 }

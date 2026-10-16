@@ -1,107 +1,160 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  ViewChild,
+  computed,
   inject,
+  input,
+  output,
+  signal,
+  viewChild,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Subscription} from 'rxjs';
 
 import {VsMod} from '../../../../services/servers.service';
 import {ModsService, VsModShortInfo} from '../../../../services/mods.service';
-import {Observable, map, shareReplay, startWith, tap} from 'rxjs';
 import {environment} from '../../../../environments/environment';
+
+// Keeps loaded logos referenced so the browser doesn't refetch them every time a tooltip is re-created.
+const logoCache = new Map<string, HTMLImageElement>();
+
+function preloadLogo(url: string | undefined): void {
+  if (!url || typeof Image === 'undefined' || logoCache.has(url)) {
+    return;
+  }
+
+  const img = new Image();
+  img.decoding = 'async';
+  img.crossOrigin = 'anonymous';
+  img.src = url;
+  logoCache.set(url, img);
+}
 
 @Component({
   selector: 'app-mod-chip',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './mod-chip.html',
   styleUrl: './mod-chip.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ModChip implements OnChanges {
-  @Input({required: true}) mod!: VsMod;
+export class ModChip {
+  mod = input.required<VsMod>();
 
-  @Output() view = new EventEmitter<VsMod>();
+  view = output<VsMod>();
 
   private readonly modsService = inject(ModsService);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
-  @ViewChild('chipButton', {static: true}) private readonly chipButton?: ElementRef<HTMLButtonElement>;
-  @ViewChild('tooltipElement') private tooltipElement?: ElementRef<HTMLDivElement>;
+  private readonly chipButton = viewChild<ElementRef<HTMLButtonElement>>('chipButton');
+  private readonly tooltipElement = viewChild<ElementRef<HTMLDivElement>>('tooltipElement');
 
-  tooltip$!: Observable<TooltipViewModel>;
-  tooltipVisible = false;
-  tooltipPosition?: TooltipPosition;
+  readonly tooltipVisible = signal(false);
+  readonly tooltipPosition = signal<TooltipPosition | undefined>(undefined);
   readonly tooltipId = `mod-chip-tooltip-${Math.random().toString(36).slice(2)}`;
-  private measurementTimerId?: number;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if ('mod' in changes && this.mod) {
-      this.tooltip$ = this.modsService.shortInfo$(this.mod.id).pipe(
-        map(info => this.buildTooltip(this.mod, info)),
-        startWith(this.buildTooltip(this.mod)),
-        tap(() => this.onTooltipContentChanged()),
-        shareReplay({bufferSize: 1, refCount: true})
-      );
-    }
+  private readonly info = signal<VsModShortInfo | undefined>(undefined);
+  readonly tooltip = computed(() => this.buildTooltip(this.mod(), this.info()));
+  readonly ariaLabel = computed(() => {
+    const mod = this.mod();
+    return mod.version ? `${mod.id} v${mod.version}` : mod.id;
+  });
+
+  private infoSub?: Subscription;
+  private infoLoadedFor?: string;
+  private measurementTimerId?: number;
+  private viewportListening = false;
+
+  private readonly onViewportChange = () => this.updateTooltipPosition();
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.infoSub?.unsubscribe();
+      this.cancelScheduledMeasurement();
+      this.stopViewportListening();
+    });
   }
 
   onClick() {
-    this.view.emit(this.mod);
-    this.onPointerLeave();
+    this.view.emit(this.mod());
+    this.hideTooltip();
   }
 
   onPointerEnter() {
-    this.tooltipVisible = true;
-    this.tooltipPosition = undefined;
-    this.cdr.markForCheck();
-    this.scheduleTooltipMeasurement();
+    this.showTooltip();
   }
 
   onPointerLeave() {
-    this.tooltipVisible = false;
-    this.tooltipPosition = undefined;
-    this.cancelScheduledMeasurement();
-    this.cdr.markForCheck();
+    this.hideTooltip();
   }
 
   onFocus() {
-    this.tooltipVisible = true;
-    this.tooltipPosition = undefined;
-    this.cdr.markForCheck();
+    this.showTooltip();
+  }
+
+  private showTooltip() {
+    this.tooltipVisible.set(true);
+    this.tooltipPosition.set(undefined);
+    this.loadInfo();
+    this.startViewportListening();
     this.scheduleTooltipMeasurement();
   }
 
-  private updateTooltipPosition() {
-    const position = this.calculateTooltipPosition();
-    if (!position) {
-      if (this.tooltipVisible) {
-        this.scheduleTooltipMeasurement();
-      }
-      return;
-    }
-
-    this.tooltipPosition = position;
-    this.cdr.markForCheck();
+  private hideTooltip() {
+    this.tooltipVisible.set(false);
+    this.tooltipPosition.set(undefined);
+    this.cancelScheduledMeasurement();
+    this.stopViewportListening();
   }
 
-  @HostListener('window:resize')
-  @HostListener('window:scroll')
-  onViewportChange() {
-    if (!this.tooltipVisible) {
+  // Mod details are only resolved once a tooltip is actually requested.
+  private loadInfo() {
+    const id = this.mod().id;
+    if (this.infoLoadedFor === id) {
       return;
     }
 
-    this.updateTooltipPosition();
+    this.infoLoadedFor = id;
+    this.infoSub?.unsubscribe();
+    this.infoSub = this.modsService.shortInfo$(id).subscribe(info => {
+      this.info.set(info);
+      preloadLogo(this.buildLogoUrl(info));
+      this.scheduleTooltipMeasurement();
+    });
+  }
+
+  private startViewportListening() {
+    if (this.viewportListening || typeof window === 'undefined') {
+      return;
+    }
+
+    this.viewportListening = true;
+    window.addEventListener('resize', this.onViewportChange, {passive: true});
+    window.addEventListener('scroll', this.onViewportChange, {passive: true, capture: true});
+  }
+
+  private stopViewportListening() {
+    if (!this.viewportListening || typeof window === 'undefined') {
+      return;
+    }
+
+    this.viewportListening = false;
+    window.removeEventListener('resize', this.onViewportChange);
+    window.removeEventListener('scroll', this.onViewportChange, {capture: true});
+  }
+
+  private updateTooltipPosition() {
+    if (!this.tooltipVisible()) {
+      return;
+    }
+
+    const position = this.calculateTooltipPosition();
+    if (!position) {
+      this.scheduleTooltipMeasurement();
+      return;
+    }
+
+    this.tooltipPosition.set(position);
   }
 
   private calculateTooltipPosition(): TooltipPosition | undefined {
@@ -109,8 +162,8 @@ export class ModChip implements OnChanges {
       return undefined;
     }
 
-    const button = this.chipButton?.nativeElement;
-    const tooltip = this.tooltipElement?.nativeElement;
+    const button = this.chipButton()?.nativeElement;
+    const tooltip = this.tooltipElement()?.nativeElement;
     if (!button || !tooltip) {
       return undefined;
     }
@@ -140,7 +193,7 @@ export class ModChip implements OnChanges {
   }
 
   private scheduleTooltipMeasurement(): void {
-    if (!this.tooltipVisible || typeof window === 'undefined') {
+    if (!this.tooltipVisible() || typeof window === 'undefined') {
       return;
     }
 
@@ -155,21 +208,10 @@ export class ModChip implements OnChanges {
   }
 
   private cancelScheduledMeasurement(): void {
-    if (this.measurementTimerId === undefined || typeof window === 'undefined') {
-      this.measurementTimerId = undefined;
-      return;
+    if (this.measurementTimerId !== undefined && typeof window !== 'undefined') {
+      window.clearTimeout(this.measurementTimerId);
     }
-
-    window.clearTimeout(this.measurementTimerId);
     this.measurementTimerId = undefined;
-  }
-
-  private onTooltipContentChanged(): void {
-    if (!this.tooltipVisible) {
-      return;
-    }
-
-    this.scheduleTooltipMeasurement();
   }
 
   private buildTooltip(mod: VsMod, info?: VsModShortInfo): TooltipViewModel {
@@ -182,14 +224,7 @@ export class ModChip implements OnChanges {
     const meta = metaParts.length ? metaParts.join(' • ') : undefined;
     const summary = info?.summary?.trim();
 
-    const labelParts = [
-      [title, meta].filter(Boolean).join(' • '),
-      summary,
-      stats.length ? stats.join(' • ') : undefined,
-    ].filter((value): value is string => !!value && value.trim().length > 0);
-
     return {
-      label: labelParts.join('\n'),
       title,
       meta,
       summary,
@@ -232,7 +267,6 @@ interface TooltipPosition {
 }
 
 interface TooltipViewModel {
-  label: string;
   title: string;
   meta?: string;
   summary?: string;

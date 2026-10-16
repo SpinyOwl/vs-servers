@@ -1,20 +1,22 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { VsMod } from '../../../services/servers.service';
-import { ModChip } from './mod-chip/mod-chip';
+import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
+import {VsMod} from '../../../services/servers.service';
+import {ModChip} from './mod-chip/mod-chip';
+
+const collator = new Intl.Collator();
 
 @Component({
   selector: 'app-mods-list',
   standalone: true,
-  imports: [CommonModule, ModChip],
+  imports: [ModChip],
   templateUrl: './mods-list.html',
   styleUrl: './mods-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModsList {
-  @Input() mods: VsMod[] | null | undefined;
-  @Output() modSelected = new EventEmitter<VsMod>();
+  mods = input<VsMod[] | null | undefined>();
+  modSelected = output<VsMod>();
 
-  sortedMods() {
-    return (this.mods ?? []).slice().sort((a, b) => a.id.localeCompare(b.id));
-  }
+  sortedMods = computed(() =>
+    (this.mods() ?? []).slice().sort((a, b) => collator.compare(a.id, b.id))
+  );
 }

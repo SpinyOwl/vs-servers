@@ -26,7 +26,7 @@
   } @else {
     @if (info(); as info) {
       @if (info.logofile) {
-        <img class="mod-logo" [src]="info.logofile" alt=""/>
+        <img class="mod-logo" [src]="info.logofile" alt="" crossorigin="anonymous"/>
       }
 
       @if (info.text) {

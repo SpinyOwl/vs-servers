@@ -2,9 +2,9 @@
   <div class="count">
     {{ filtered().length }} server{{ filtered().length === 1 ? '' : 's' }}
   </div>
-  <button class="btn" (click)="prev()" [disabled]="page() <= 1">Prev</button>
-  <span class="muted">Page {{ page() }} / {{ pages() }}</span>
-  <button class="btn" (click)="next()" [disabled]="page() >= pages()">Next</button>
+  <button class="btn" (click)="prev()" [disabled]="currentPage() <= 1">Prev</button>
+  <span class="muted">Page {{ currentPage() }} / {{ pages() }}</span>
+  <button class="btn" (click)="next()" [disabled]="currentPage() >= pages()">Next</button>
   <select (ngModelChange)="setPageSize($event)" [ngModel]="pageSize()" class="select" aria-label="Servers per page">
     <option [ngValue]="10">10 / page</option>
     <option [ngValue]="20">20 / page</option>

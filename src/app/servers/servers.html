@@ -2,7 +2,7 @@
   <button (click)="reload()" class="btn">Reload</button>
 </div>
 
-@if (loading()) {
+@if (loading() && !servers().length) {
   <section class="info">Loading…</section>
 }
 
@@ -10,7 +10,7 @@
   <section class="error">⚠️ {{ error() }}</section>
 }
 
-@if (!loading() && !error()) {
+@if (servers().length || (!loading() && !error())) {
   <div class="servers-layout" [class.has-sidebar]="!!selectedMod()">
     <app-server-list
       [servers]="servers()"

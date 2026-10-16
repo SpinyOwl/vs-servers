@@ -1,0 +1,30 @@
+<footer class="footer">
+  <div class="footer-info">
+    <strong>{{ name }}</strong>
+    <span class="version" title="Application version">v{{ version }}</span>
+    @if (commitUrl) {
+      <a
+        class="version"
+        [href]="commitUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        [title]="'Built ' + builtAt"
+        >{{ commitShort }}{{ dirty ? '+' : '' }}</a
+      >
+    } @else {
+      <span class="version" [title]="'Built ' + builtAt">{{ commitShort }}</span>
+    }
+    <span class="muted">
+      An unofficial browser for public Vintage Story servers and their mods.
+    </span>
+  </div>
+  <nav class="footer-links" aria-label="Project links">
+    <a [href]="repoUrl" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://mods.vintagestory.at" target="_blank" rel="noopener noreferrer">Mod DB</a>
+    <a href="https://www.vintagestory.at" target="_blank" rel="noopener noreferrer">Vintage Story</a>
+    <a href="mailto:contact@spinyowl.com">Contact</a>
+  </nav>
+  <div class="footer-meta muted">
+    Data: official master server &amp; mod database · © {{ year }} SpinyOwl
+  </div>
+</footer>
