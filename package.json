@@ -2,6 +2,13 @@
   "name": "vs-servers",
   "version": "1.0.0",
   "scripts": {
+    "gen:build-info": "node scripts/gen-build-info.mjs",
+    "postinstall": "node scripts/gen-build-info.mjs",
+    "prestart": "node scripts/gen-build-info.mjs",
+    "prestart:dev": "node scripts/gen-build-info.mjs",
+    "prebuild": "node scripts/gen-build-info.mjs",
+    "prewatch": "node scripts/gen-build-info.mjs",
+    "pretest": "node scripts/gen-build-info.mjs",
     "ng": "ng",
     "start": "ng serve --configuration production",
     "start:dev": "ng serve --configuration development",

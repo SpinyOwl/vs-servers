@@ -2,6 +2,18 @@
   <div class="footer-info">
     <strong>{{ name }}</strong>
     <span class="version" title="Application version">v{{ version }}</span>
+    @if (commitUrl) {
+      <a
+        class="version"
+        [href]="commitUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        [title]="'Built ' + builtAt"
+        >{{ commitShort }}{{ dirty ? '+' : '' }}</a
+      >
+    } @else {
+      <span class="version" [title]="'Built ' + builtAt">{{ commitShort }}</span>
+    }
     <span class="muted">
       An unofficial browser for public Vintage Story servers and their mods.
     </span>
