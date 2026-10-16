@@ -55,15 +55,36 @@
     padding: 8px 16px;
   }
 
-  /* mod details open as a slide-over drawer instead of landing at the bottom of the card list */
-  app-mod-pane {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 10000;
-    width: min(480px, 100vw);
-    flex: none;
-    box-shadow: -12px 0 32px rgba(0, 0, 0, 0.35);
+  /* wide screens: mod details is a sticky column next to the cards, the list shrinks */
+  @media (min-width: 1000px) {
+    .servers-layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    app-server-list {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    app-mod-pane {
+      position: sticky;
+      top: 12px;
+      flex: 0 0 420px;
+      width: 420px;
+      height: calc(100vh - 24px);
+    }
+  }
+
+  /* narrow screens: slide-over drawer, since there is no room for a column */
+  @media (max-width: 999px) {
+    app-mod-pane {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10000;
+      width: min(480px, 100vw);
+      flex: none;
+      box-shadow: -12px 0 32px rgba(0, 0, 0, 0.35);
+    }
   }
 }

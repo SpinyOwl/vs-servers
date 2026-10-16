@@ -136,7 +136,11 @@
 :host-context([data-design='b']) .mod-sidebar {
   padding: 20px;
   max-width: 100%;
-  border-radius: var(--radius) 0 0 var(--radius);
+}
+@media (max-width: 999px) {
+  :host-context([data-design='b']) .mod-sidebar {
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
 }
 :host-context([data-design='b']) .sidebar-close {
   border: 1px solid var(--border);
