@@ -16,6 +16,20 @@ import {VsMod} from '../../../../services/servers.service';
 import {ModsService, VsModShortInfo} from '../../../../services/mods.service';
 import {environment} from '../../../../environments/environment';
 
+// Keeps loaded logos referenced so the browser doesn't refetch them every time a tooltip is re-created.
+const logoCache = new Map<string, HTMLImageElement>();
+
+function preloadLogo(url: string | undefined): void {
+  if (!url || typeof Image === 'undefined' || logoCache.has(url)) {
+    return;
+  }
+
+  const img = new Image();
+  img.decoding = 'async';
+  img.src = url;
+  logoCache.set(url, img);
+}
+
 @Component({
   selector: 'app-mod-chip',
   standalone: true,
@@ -103,6 +117,7 @@ export class ModChip {
     this.infoSub?.unsubscribe();
     this.infoSub = this.modsService.shortInfo$(id).subscribe(info => {
       this.info.set(info);
+      preloadLogo(this.buildLogoUrl(info));
       this.scheduleTooltipMeasurement();
     });
   }
