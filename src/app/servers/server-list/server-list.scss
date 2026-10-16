@@ -49,20 +49,6 @@ thead th {
   user-select: none;
 }
 
-thead tr.filters th {
-  padding: 4px;
-  cursor: default;
-}
-
-thead tr.filters th .input,
-thead tr.filters th .select {
-  width: 100%;
-}
-
-thead tr.filters th app-mod-filter {
-  width: 100%;
-}
-
 thead tr.columns th {
   cursor: pointer;
 }
@@ -152,19 +138,50 @@ table tbody tr td.bool-col {
   width: 30px;
 }
 
-.quick-filters {
+.filter-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  align-items: start;
+  margin: 8px 0;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.filter-panel .name,
+.filter-panel .mods,
+.filter-panel .active-filters {
+  grid-column: 1 / -1;
+}
+
+.filter-panel .input,
+.filter-panel .select {
+  width: 100%;
+  min-height: 34px;
+}
+
+.filter-panel .toggles {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin: 8px 0;
+  gap: 12px;
+  grid-column: 1 / -1;
 }
 
-.quick-filters .toggle {
+.filter-panel .toggle {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
+}
+
+.filter-panel .active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
 .active-chip {
@@ -216,18 +233,8 @@ table tbody tr td.bool-col {
     color: var(--text-muted);
   }
 
-  thead tr.filters th {
-    text-transform: none;
-    padding: 3px;
-  }
-
   thead tr.columns th {
     border-bottom: 2px solid var(--border);
-  }
-
-  /* give the password / whitelist filter selects room to show their value */
-  thead tr.filters th.bool-col {
-    width: 112px;
   }
 
   tbody tr:nth-child(even) td {
@@ -277,8 +284,7 @@ table tbody tr td.bool-col {
   /* narrower screens: drop the description column, keep the rest scrollable */
   @media (max-width: 900px) {
     th.description,
-    td.c-desc,
-    thead tr.filters th:nth-child(2) {
+    td.c-desc {
       display: none;
     }
   }
@@ -319,41 +325,22 @@ table tbody tr td.bool-col {
     min-width: 0;
   }
 
-  /* filters become a panel */
   thead {
     position: static;
   }
-  thead tr.filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  .filter-panel {
     gap: 10px;
     padding: 14px;
     margin-bottom: 10px;
-    background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
   }
-  thead tr.filters th {
-    display: block;
-    padding: 0;
-    width: auto;
-    background: transparent;
-    border: none;
-  }
-  thead tr.filters th:empty {
-    display: none;
-  }
-  thead tr.filters th:first-child {
-    grid-column: 1 / -1;
-  }
-  thead tr.filters .input,
-  thead tr.filters .select {
+  .filter-panel .input,
+  .filter-panel .select {
     min-height: 42px;
     padding: 8px 12px;
     border-radius: 10px;
   }
-
   /* sortable headers become a pill bar */
   thead tr.columns {
     display: flex;
@@ -530,13 +517,9 @@ table tbody tr td.bool-col {
   }
 
   @media (max-width: 480px) {
-    thead tr.filters {
+    .filter-panel {
       padding: 10px;
       grid-template-columns: 1fr 1fr;
-    }
-    thead tr.filters th:nth-child(3),
-    thead tr.filters th:last-child {
-      grid-column: 1 / -1;
     }
     tbody tr {
       padding: 14px;
