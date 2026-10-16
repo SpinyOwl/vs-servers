@@ -27,7 +27,7 @@
     aria-live="polite"
   >
     @if (tip.logoUrl; as logo) {
-      <img class="mod-chip-tooltip-logo" [src]="logo" alt="" decoding="async" />
+      <img class="mod-chip-tooltip-logo" [src]="logo" alt="" decoding="async" crossorigin="anonymous" />
     }
     <div class="mod-chip-tooltip-content">
       <div class="mod-chip-tooltip-title">{{ tip.title }}</div>

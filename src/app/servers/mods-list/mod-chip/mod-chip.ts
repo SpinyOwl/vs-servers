@@ -26,6 +26,7 @@ function preloadLogo(url: string | undefined): void {
 
   const img = new Image();
   img.decoding = 'async';
+  img.crossOrigin = 'anonymous';
   img.src = url;
   logoCache.set(url, img);
 }
