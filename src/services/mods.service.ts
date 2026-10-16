@@ -59,45 +59,50 @@ export class ModsService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiUrl;
   private readonly cache = new Map<string, CacheEntry>();
+  private readonly inflight = new Map<string, Observable<VsModInfo>>();
   private modsListCache?: ModsListCacheEntry;
   private modsListRequest$?: Observable<VsModShortInfo[]>;
+  private modsIndex = new Map<string, VsModShortInfo>();
   private readonly ttl = 60 * 60 * 1000; // 1 hour
 
   get$(modid: string): Observable<VsModInfo> {
-    const now = Date.now();
     const cached = this.cache.get(modid);
-    if (cached && now - cached.timestamp < this.ttl) {
+    if (cached && Date.now() - cached.timestamp < this.ttl) {
       return of(cached.data);
     }
 
-    // convert response to VsModInfo
-    return this.getVsModInfoObservable(modid)
-      .pipe(map(response => {
+    const pending = this.inflight.get(modid);
+    if (pending) {
+      return pending;
+    }
+
+    const request$ = this.getVsModInfoObservable(modid).pipe(
+      map(response => {
         this.cache.set(modid, {data: response.mod, timestamp: Date.now()});
         return response.mod;
-      }));
+      }),
+      finalize(() => this.inflight.delete(modid)),
+      shareReplay({bufferSize: 1, refCount: false})
+    );
+    this.inflight.set(modid, request$);
+    return request$;
   }
 
   private getVsModInfoObservable(modid: string) {
-    // http get with error handling
-    let url = `${this.base}/m/mod/${modid}`;
-    console.log(`Fetching mod info for ${modid} from "${url}"`);
-    return this.http.get<VsModResponse>(url).pipe(
+    return this.http.get<VsModResponse>(`${this.base}/m/mod/${modid}`).pipe(
       map(response => {
         if (response.statuscode === '200') {
           return response;
-        } else {
-          console.error(`Failed to fetch mod info: ${JSON.stringify(response)}`);
-          throw new Error(`Failed to fetch mod info: ${response.statuscode}`);
         }
+        console.error(`Failed to fetch mod info: ${JSON.stringify(response)}`);
+        throw new Error(`Failed to fetch mod info: ${response.statuscode}`);
       })
     );
   }
 
   getAll$(): Observable<VsModShortInfo[]> {
-    const now = Date.now();
     const cached = this.modsListCache;
-    if (cached && now - cached.timestamp < this.ttl) {
+    if (cached && Date.now() - cached.timestamp < this.ttl) {
       return of(cached.data);
     }
 
@@ -109,6 +114,7 @@ export class ModsService {
       map(response => {
         if (response.statuscode === '200' && Array.isArray(response.mods)) {
           this.modsListCache = {data: response.mods, timestamp: Date.now()};
+          this.modsIndex = this.buildIndex(response.mods);
           return response.mods;
         }
 
@@ -130,26 +136,25 @@ export class ModsService {
 
   shortInfo$(modid: string): Observable<VsModShortInfo | undefined> {
     return this.getAll$().pipe(
-      map(list => {
-        const trimmed = modid?.trim();
-        if (!trimmed) {
-          return undefined;
-        }
-
-        return list.find(mod => this.matchesMod(trimmed, mod));
+      map(() => {
+        const key = modid?.trim().toLowerCase();
+        return key ? this.modsIndex.get(key) : undefined;
       })
     );
   }
 
-  private matchesMod(id: string, mod: VsModShortInfo): boolean {
-    const candidates = [mod.urlalias, ...(mod.modidstrs ?? [])]
-      .filter((value): value is string => typeof value === 'string');
-    if (!candidates.length) {
-      return false;
+  private buildIndex(list: VsModShortInfo[]): Map<string, VsModShortInfo> {
+    const index = new Map<string, VsModShortInfo>();
+    for (const mod of list) {
+      for (const alias of [mod.urlalias, ...(mod.modidstrs ?? [])]) {
+        if (typeof alias === 'string' && alias) {
+          const key = alias.toLowerCase();
+          if (!index.has(key)) {
+            index.set(key, mod);
+          }
+        }
+      }
     }
-
-    const idLower = id.toLowerCase();
-    return candidates.some(candidate => candidate === id || candidate === idLower || candidate.toLowerCase() === idLower);
+    return index;
   }
 }
-

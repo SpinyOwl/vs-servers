@@ -1,18 +1,27 @@
-import {Component, DestroyRef, computed, effect, inject, input, output, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ModsList} from '../mods-list/mods-list';
 import {ModFilter} from './mod-filter/mod-filter';
 import {VsMod, VsServer} from '../../../services/servers.service';
 import {ActivatedRoute, ParamMap, Params, Router} from '@angular/router';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {debounceTime, distinctUntilChanged} from 'rxjs';
+
+const collator = new Intl.Collator();
+
+interface IndexedServer {
+  server: VsServer;
+  name: string;
+  modIds: string[];
+}
 
 @Component({
   selector: 'app-server-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModsList, ModFilter],
+  imports: [FormsModule, ModsList, ModFilter],
   templateUrl: './server-list.html',
   styleUrl: './server-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServerList {
   servers = input<VsServer[]>([]);
@@ -32,36 +41,48 @@ export class ServerList {
   sortColumn = signal<string>('');
   sortAsc = signal<boolean>(true);
 
+  // Debounced copy of the name filter: typing stays instant, filtering/URL sync run after a pause.
+  private debouncedName!: () => string;
+
   versions = computed(() => {
     const list = this.servers()
       .map((s) => s.gameVersion)
       .filter((v): v is string => !!v);
-    return Array.from(new Set(list)).sort((a, b) => a.localeCompare(b)).reverse();
+    return Array.from(new Set(list)).sort((a, b) => collator.compare(b, a));
   });
 
+  // Lower-cased lookup data is computed once per server list, not once per filter change.
+  private indexed = computed<IndexedServer[]>(() =>
+    this.servers().map((server) => ({
+      server,
+      name: (server.serverName ?? '').toLowerCase(),
+      modIds: (server.mods ?? []).map((m) => m.id.toLowerCase()),
+    }))
+  );
+
   filtered = computed(() => {
-    const nameQ = this.filterName().trim().toLowerCase();
+    const nameQ = this.debouncedName().trim().toLowerCase();
     const ver = this.filterVersion().trim();
     const mods = this.filterMods()
       .map((value) => value.trim().toLowerCase())
       .filter((value) => value.length > 0);
     const hasPw = this.filterHasPassword().trim();
     const wl = this.filterWhitelisted().trim();
-    return this.servers().filter((s) => {
-      const n = (s.serverName ?? '').toLowerCase();
-      const modMatch =
-        mods.length === 0 ||
-        mods.every((mod) => s.mods?.some((m) => m.id.toLowerCase().includes(mod)) ?? false);
-      const pwMatch = !hasPw || String(s.hasPassword ?? false) === hasPw;
-      const wlMatch = !wl || String(s.whitelisted ?? false) === wl;
-      return (
-        (!nameQ || n.includes(nameQ)) &&
-        (!ver || s.gameVersion === ver) &&
-        modMatch &&
-        pwMatch &&
-        wlMatch
-      );
-    });
+    return this.indexed()
+      .filter(({server: s, name, modIds}) => {
+        const modMatch =
+          mods.length === 0 || mods.every((mod) => modIds.some((id) => id.includes(mod)));
+        const pwMatch = !hasPw || String(s.hasPassword ?? false) === hasPw;
+        const wlMatch = !wl || String(s.whitelisted ?? false) === wl;
+        return (
+          (!nameQ || name.includes(nameQ)) &&
+          (!ver || s.gameVersion === ver) &&
+          modMatch &&
+          pwMatch &&
+          wlMatch
+        );
+      })
+      .map(({server}) => server);
   });
 
   sorted = computed(() => {
@@ -70,29 +91,17 @@ export class ServerList {
     const list = this.filtered().slice();
     if (col) {
       list.sort((a, b) => {
-        let av: any;
-        let bv: any;
         switch (col) {
           case 'serverName':
-            av = a.serverName || '';
-            bv = b.serverName || '';
-            return av.localeCompare(bv);
+            return collator.compare(a.serverName || '', b.serverName || '');
           case 'gameDescription':
-            av = a.gameDescription || '';
-            bv = b.gameDescription || '';
-            return av.localeCompare(bv);
+            return collator.compare(a.gameDescription || '', b.gameDescription || '');
           case 'mods':
-            av = a.mods?.length || 0;
-            bv = b.mods?.length || 0;
-            return av - bv;
+            return (a.mods?.length || 0) - (b.mods?.length || 0);
           case 'players':
-            av = a.players || 0;
-            bv = b.players || 0;
-            return av - bv;
+            return (a.players || 0) - (b.players || 0);
           case 'gameVersion':
-            av = a.gameVersion || '';
-            bv = b.gameVersion || '';
-            return av.localeCompare(bv);
+            return collator.compare(a.gameVersion || '', b.gameVersion || '');
           default:
             return 0;
         }
@@ -103,8 +112,10 @@ export class ServerList {
   });
 
   pages = computed(() => Math.max(1, Math.ceil(this.sorted().length / this.pageSize())));
+  // The requested page clamped to the available range (no effect needed to correct it).
+  currentPage = computed(() => Math.min(this.page(), this.pages()));
   paged = computed(() => {
-    const start = (this.page() - 1) * this.pageSize();
+    const start = (this.currentPage() - 1) * this.pageSize();
     return this.sorted().slice(start, start + this.pageSize());
   });
 
@@ -117,18 +128,11 @@ export class ServerList {
         .subscribe((params) => this.applyQueryParams(params));
     }
 
-    effect(() => {
-      this.servers();
-      this.page.set(1);
-    });
-
-    effect(() => {
-      const maxPages = this.pages();
-      const current = this.page();
-      if (current > maxPages) {
-        this.page.set(maxPages);
-      }
-    });
+    const debounced = toSignal(
+      toObservable(this.filterName).pipe(debounceTime(200), distinctUntilChanged()),
+      {initialValue: this.filterName()}
+    );
+    this.debouncedName = debounced;
 
     effect(() => {
       if (!this.route || !this.router) {
@@ -138,13 +142,13 @@ export class ServerList {
       const currentParams = this.route.snapshot.queryParams;
       const nextParams: Params = {...currentParams};
 
-      this.writeStringParam(nextParams, 'name', this.filterName());
+      this.writeStringParam(nextParams, 'name', debounced());
       this.writeStringParam(nextParams, 'version', this.filterVersion());
       this.writeStringArrayParam(nextParams, 'mod', this.filterMods());
       this.writeBooleanParam(nextParams, 'hasPassword', this.filterHasPassword());
       this.writeBooleanParam(nextParams, 'whitelisted', this.filterWhitelisted());
       this.writeNumberParam(nextParams, 'pageSize', this.pageSize(), 20);
-      this.writeNumberParam(nextParams, 'page', this.page(), 1);
+      this.writeNumberParam(nextParams, 'page', this.currentPage(), 1);
       this.writeSortParams(nextParams, this.sortColumn(), this.sortAsc());
 
       if (this.queryParamsChanged(currentParams, nextParams)) {
@@ -169,11 +173,11 @@ export class ServerList {
   }
 
   prev() {
-    if (this.page() > 1) this.page.set(this.page() - 1);
+    if (this.currentPage() > 1) this.page.set(this.currentPage() - 1);
   }
 
   next() {
-    if (this.page() < this.pages()) this.page.set(this.page() + 1);
+    if (this.currentPage() < this.pages()) this.page.set(this.currentPage() + 1);
   }
 
   sortBy(col: string) {
@@ -189,7 +193,9 @@ export class ServerList {
     let touched = false;
 
     const name = params.get('name');
-    if (name !== null && this.filterName() !== name) {
+    // Ignore the (stale) URL value while a debounced edit of the name input is still pending.
+    const namePending = !!this.debouncedName && this.debouncedName() !== this.filterName();
+    if (name !== null && !namePending && this.filterName() !== name) {
       this.filterName.set(name);
       touched = true;
     }

@@ -1,8 +1,13 @@
 import {Component, computed, DestroyRef, ElementRef, inject, input, output, signal, ViewChild,} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 import {ModsService, VsModShortInfo} from '../../../../services/mods.service';
+
+interface ModCandidate {
+  value: string;
+  lower: string;
+  description?: string;
+}
 
 interface ModSuggestionViewModel {
   value: string;
@@ -12,7 +17,7 @@ interface ModSuggestionViewModel {
 @Component({
   selector: 'app-mod-filter',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './mod-filter.html',
   styleUrl: './mod-filter.scss',
 })
@@ -26,13 +31,13 @@ export class ModFilter {
   private readonly modsService = inject(ModsService);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly allMods = signal<VsModShortInfo[]>([]);
+  // Unique, pre-lowercased aliases, built once when the mod list arrives.
+  private readonly candidates = signal<ModCandidate[]>([]);
   private readonly focused = signal<boolean>(false);
 
   readonly query = signal<string>('');
 
   readonly suggestions = computed<ModSuggestionViewModel[]>(() => {
-    const list = this.allMods();
     const q = this.query().trim().toLowerCase();
     if (!q) {
       return [];
@@ -44,31 +49,14 @@ export class ModFilter {
         .filter((value) => value.length > 0)
     );
 
-    const unique = new Map<string, ModSuggestionViewModel>();
-
-    for (const mod of list) {
-      const candidates = this.getModCandidates(mod);
-      const description = mod.name?.trim();
-      for (const candidate of candidates) {
-        const normalized = candidate.toLowerCase();
-        if (selected.has(normalized)) {
-          continue;
-        }
-        if (!normalized.includes(q)) {
-          continue;
-        }
-        if (!unique.has(normalized)) {
-          unique.set(normalized, {
-            value: candidate,
-            description,
-          });
-        }
+    const result: ModSuggestionViewModel[] = [];
+    for (const c of this.candidates()) {
+      if (c.lower.includes(q) && !selected.has(c.lower)) {
+        result.push({value: c.value, description: c.description});
       }
     }
 
-    return Array.from(unique.values())
-      .sort((a, b) => a.value.localeCompare(b.value))
-      .slice(0, 20);
+    return result.sort((a, b) => a.value.localeCompare(b.value)).slice(0, 20);
   });
 
   readonly showSuggestions = computed<boolean>(() => {
@@ -79,7 +67,7 @@ export class ModFilter {
     this.modsService
       .getAll$()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((mods) => this.allMods.set(Array.isArray(mods) ? mods : []));
+      .subscribe((mods) => this.candidates.set(this.buildCandidates(Array.isArray(mods) ? mods : [])));
   }
 
   focusInput() {
@@ -175,6 +163,20 @@ export class ModFilter {
     this.modsChange.emit([...current, value]);
     this.query.set('');
     this.focusInput();
+  }
+
+  private buildCandidates(list: VsModShortInfo[]): ModCandidate[] {
+    const unique = new Map<string, ModCandidate>();
+    for (const mod of list) {
+      const description = mod.name?.trim();
+      for (const value of this.getModCandidates(mod)) {
+        const lower = value.toLowerCase();
+        if (!unique.has(lower)) {
+          unique.set(lower, {value, lower, description});
+        }
+      }
+    }
+    return Array.from(unique.values());
   }
 
   private getModCandidates(mod: VsModShortInfo): string[] {

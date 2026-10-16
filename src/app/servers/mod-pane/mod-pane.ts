@@ -1,5 +1,4 @@
 import {Component, OnDestroy, computed, effect, inject, input, output, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {ModsService, VsModInfo} from '../../../services/mods.service';
 import {VsMod} from '../../../services/servers.service';
 import {Subscription} from 'rxjs';
@@ -7,7 +6,7 @@ import {Subscription} from 'rxjs';
 @Component({
   selector: 'app-mod-pane',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './mod-pane.html',
   styleUrl: './mod-pane.scss',
 })

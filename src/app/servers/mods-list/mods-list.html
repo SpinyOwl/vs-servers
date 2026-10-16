@@ -1,5 +1,5 @@
 <div class="mods">
-  @if (mods?.length) {
+  @if (mods()?.length) {
     @for (m of sortedMods(); track m.id) {
       <app-mod-chip [mod]="m" (view)="modSelected.emit($event)"></app-mod-chip>
     }
