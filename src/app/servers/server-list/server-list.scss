@@ -365,13 +365,14 @@ table tbody tr td.bool-col {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    /* no transform here: it would become the containing block of the fixed mod tooltip */
     transition:
       border-color 0.15s,
-      transform 0.15s;
+      box-shadow 0.15s;
   }
   tbody tr:hover {
     border-color: var(--accent);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px var(--accent);
   }
   tbody tr:has(td.empty) {
     display: block;
