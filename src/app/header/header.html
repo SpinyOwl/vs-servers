@@ -17,11 +17,11 @@
       type="button"
       class="btn theme-toggle"
       (click)="toggleTheme()"
-      [attr.aria-label]="theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+      [attr.aria-label]="'Theme: ' + theme() + '. Click to change'"
+      [title]="'Theme: ' + theme()"
     >
-      <span class="material-symbols-outlined" aria-hidden="true">{{
-        theme() === 'dark' ? 'light_mode' : 'dark_mode'
-      }}</span>
+      <span class="material-symbols-outlined" aria-hidden="true">palette</span>
+      <span class="theme-name">{{ theme() }}</span>
     </button>
     <a href="mailto:contact@spinyowl.com" class="btn">Contact</a>
     <a routerLink="/feedback" class="btn">Feedback</a>

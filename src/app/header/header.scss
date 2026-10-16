@@ -46,6 +46,8 @@
 .theme-toggle {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
+  text-transform: capitalize;
   padding: 4px 8px;
 }
 

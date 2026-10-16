@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 type Design = 'classic' | 'a' | 'b';
-type Theme = 'dark' | 'light';
+type Theme = 'classic' | 'dark' | 'light';
+const THEMES: Theme[] = ['classic', 'dark', 'light'];
 
 const root = document.documentElement;
 
@@ -16,14 +17,14 @@ const root = document.documentElement;
 })
 export class Header {
   readonly designs: { id: Design; label: string; title: string }[] = [
-    { id: 'classic', label: 'Classic', title: 'Original look' },
-    { id: 'a', label: 'A · Compact', title: 'Dense dark table' },
-    { id: 'b', label: 'B · Cards', title: 'Responsive cards' },
+    { id: 'classic', label: 'Original', title: 'Original table layout' },
+    { id: 'a', label: 'Compact', title: 'Dense table' },
+    { id: 'b', label: 'Cards', title: 'Responsive cards' },
   ];
 
   // Initial values are set before first paint by the inline script in index.html.
   readonly design = signal<Design>((root.dataset['design'] as Design) || 'a');
-  readonly theme = signal<Theme>((root.dataset['theme'] as Theme) || 'dark');
+  readonly theme = signal<Theme>((root.dataset['theme'] as Theme) || 'classic');
 
   setDesign(value: Design) {
     this.design.set(value);
@@ -31,7 +32,7 @@ export class Header {
   }
 
   toggleTheme() {
-    const next: Theme = this.theme() === 'dark' ? 'light' : 'dark';
+    const next = THEMES[(THEMES.indexOf(this.theme()) + 1) % THEMES.length];
     this.theme.set(next);
     this.apply('theme', next);
   }
