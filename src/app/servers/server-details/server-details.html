@@ -1,12 +1,12 @@
 @if (opened() && server(); as s) {
   <section class="panel" [attr.aria-label]="'Details of ' + (s.serverName || s.serverIP)">
-    <header class="head">
-      <a class="join" href="vintagestoryjoin://{{ s.serverIP }}">Join</a>
-      <button type="button" class="close" (click)="close()">Close</button>
-    </header>
-
     <div class="columns">
       <section class="col info" aria-label="Server info">
+        <div class="actions">
+          <a class="join" href="vintagestoryjoin://{{ s.serverIP }}">Join</a>
+          <button type="button" class="close" (click)="close()">Close</button>
+        </div>
+
         @if (s.gameDescription) {
           <div class="description" [innerHTML]="s.gameDescription"></div>
         } @else {

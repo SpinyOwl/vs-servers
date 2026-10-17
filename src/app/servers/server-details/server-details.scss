@@ -14,12 +14,12 @@
   cursor: default;
 }
 
-.head {
+/* Join / Close live in the left column, not in a full-width bar */
+.actions {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px 0;
+  margin-bottom: 12px;
 }
 
 .join,
