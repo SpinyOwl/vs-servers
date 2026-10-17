@@ -50,8 +50,14 @@
 }
 
 /* the id is what the chips show and what the list is sorted by */
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+}
+
 .modid {
-  align-self: flex-start;
   padding: 1px 6px;
   border-radius: 3px;
   background: var(--chip-name-bg);

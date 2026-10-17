@@ -47,7 +47,7 @@ export class ModCard {
     return [
       typeof info.downloads === 'number' ? `Downloads: ${info.downloads}` : '',
       typeof info.follows === 'number' ? `Follows: ${info.follows}` : '',
-      info.lastreleased ? `Last release: ${info.lastreleased}` : '',
+      info.lastreleased ? `Last release: ${info.lastreleased.split(' ')[0]}` : '',
     ].filter(Boolean);
   }
 
