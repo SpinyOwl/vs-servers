@@ -1,5 +1,8 @@
 @if (opened() && server(); as s) {
-  <section class="panel" [attr.aria-label]="'Details of ' + (s.serverName || s.serverIP)">
+  <section
+    class="panel"
+    [class.no-mods]="!mods().length"
+    [attr.aria-label]="'Details of ' + (s.serverName || s.serverIP)">
     <div class="columns">
       <section class="col info" aria-label="Server info">
         <div class="actions">
@@ -29,13 +32,13 @@
         </dl>
       </section>
 
-      <section class="col mods" aria-label="Mods">
-        @for (m of mods(); track m.id) {
-          <app-mod-card [mod]="m" (view)="modSelected.emit($event)"></app-mod-card>
-        } @empty {
-          <p class="muted">No mods.</p>
-        }
-      </section>
+      @if (mods().length) {
+        <section class="col mods" aria-label="Mods">
+          @for (m of mods(); track m.id) {
+            <app-mod-card [mod]="m" (view)="modSelected.emit($event)"></app-mod-card>
+          }
+        </section>
+      }
     </div>
   </section>
 }

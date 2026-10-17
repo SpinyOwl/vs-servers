@@ -113,3 +113,17 @@
     border-bottom: 1px solid var(--border);
   }
 }
+
+/* no mods: a single full-width column, the panel fits its content */
+.panel.no-mods {
+  height: auto;
+  max-height: min(60vh, 480px);
+}
+
+.no-mods .columns {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.no-mods .info {
+  border-right: none;
+}
