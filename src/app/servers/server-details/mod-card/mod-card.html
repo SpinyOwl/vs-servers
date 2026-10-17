@@ -1,0 +1,19 @@
+<button type="button" class="mod-card" (click)="view.emit(mod())">
+  @if (card().logoUrl; as logo) {
+    <img class="logo" [src]="logo" alt="" loading="lazy" />
+  } @else {
+    <span class="logo" aria-hidden="true"></span>
+  }
+  <span class="body">
+    <span class="title">{{ card().title }}</span>
+    @if (card().meta) {
+      <span class="meta">{{ card().meta }}</span>
+    }
+    @if (card().summary) {
+      <span class="summary">{{ card().summary }}</span>
+    }
+    @if (card().stats.length) {
+      <span class="stats">{{ card().stats.join(' · ') }}</span>
+    }
+  </span>
+</button>

@@ -209,7 +209,7 @@ table tbody tr td.bool-col {
   display: none;
 }
 
-/* "Read more" opens the full description in a modal dialog; only the clamped layouts (A, B) show the button */
+/* "Details" opens the server details dialog (app-server-details); only the clamped layouts (A, B) show the button */
 .desc-toggle {
   display: none;
   margin-top: 2px;
@@ -227,55 +227,6 @@ table tbody tr td.bool-col {
 :host-context([data-design='a']) .desc-toggle,
 :host-context([data-design='b']) .desc-toggle {
   display: inline-block;
-}
-
-.desc-dialog {
-  width: min(640px, calc(100vw - 24px));
-  max-height: min(80vh, 720px);
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-  font-size: 14px;
-}
-.desc-dialog[open] {
-  display: flex;
-  flex-direction: column;
-}
-.desc-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.55);
-}
-.desc-dialog-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
-  overflow-wrap: anywhere;
-}
-.desc-dialog-close {
-  flex-shrink: 0;
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--link);
-  font: inherit;
-  cursor: pointer;
-}
-.desc-dialog-body {
-  padding: 16px;
-  overflow-y: auto;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-  line-height: 1.5;
-}
-.desc-dialog-body :where(a) {
-  color: var(--link);
 }
 
 /* =============== Variant A: compact dark table =============== */
@@ -542,8 +493,8 @@ table tbody tr td.bool-col {
     white-space: pre-line;
     overflow-wrap: anywhere;
   }
-  /* no description: drop the cell so it does not leave an empty row gap */
-  .c-desc:has(.description:empty) {
+  /* no description text: only the Details button remains in the cell */
+  .description:empty {
     display: none;
   }
 

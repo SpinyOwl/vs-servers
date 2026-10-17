@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject
 import {FormsModule} from '@angular/forms';
 import {ModsList} from '../mods-list/mods-list';
 import {ModFilter} from './mod-filter/mod-filter';
+import {ServerDetails} from '../server-details/server-details';
 import {VsMod, VsServer} from '../../../services/servers.service';
 import {ActivatedRoute, ParamMap, Params, Router, convertToParamMap} from '@angular/router';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
@@ -39,7 +40,7 @@ function getStorage(): Storage | null {
 @Component({
   selector: 'app-server-list',
   standalone: true,
-  imports: [FormsModule, ModsList, ModFilter],
+  imports: [FormsModule, ModsList, ModFilter, ServerDetails],
   templateUrl: './server-list.html',
   styleUrl: './server-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

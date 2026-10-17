@@ -133,25 +133,12 @@
                   <div [innerHTML]="s.gameDescription"></div>
                 }
               </div>
-              @if (s.gameDescription && s.gameDescription.length > 100) {
-                <button type="button" class="desc-toggle" (click)="descDialog.showModal()">
-                  Read more
-                </button>
-                <dialog
-                  #descDialog
-                  class="desc-dialog"
-                  [attr.aria-label]="'Description of ' + (s.serverName || s.serverIP)"
-                  (click)="$event.target === descDialog && descDialog.close()"
-                >
-                  <div class="desc-dialog-head">
-                    <strong>{{ s.serverName || s.serverIP }}</strong>
-                    <button type="button" class="desc-dialog-close" (click)="descDialog.close()">
-                      Close
-                    </button>
-                  </div>
-                  <div class="desc-dialog-body" [innerHTML]="s.gameDescription"></div>
-                </dialog>
-              }
+              <button type="button" class="desc-toggle" (click)="details.open()">Details</button>
+              <app-server-details
+                #details
+                [server]="s"
+                (modSelected)="modSelected.emit($event)"
+              ></app-server-details>
             </div>
           </td>
           <td class="c-mods" data-label="Mods">

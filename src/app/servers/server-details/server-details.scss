@@ -1,0 +1,128 @@
+.dialog {
+  width: min(1000px, calc(100vw - 24px));
+  height: min(85vh, 760px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.join,
+.close {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--link);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.join:hover,
+.close:hover {
+  border-color: var(--accent);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.col {
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.info {
+  border-right: 1px solid var(--border);
+}
+
+.mods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.description {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.description :where(a) {
+  color: var(--link);
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 16px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.facts dt {
+  color: var(--text-muted);
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* narrow screens: stack the columns, the whole dialog body scrolls */
+@media (max-width: 720px) {
+  .dialog {
+    height: min(90vh, 760px);
+  }
+  .columns {
+    display: block;
+    overflow-y: auto;
+  }
+  .col {
+    overflow: visible;
+  }
+  .info {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
