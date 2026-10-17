@@ -517,17 +517,14 @@ table tbody tr td.bool-col {
     white-space: pre-line;
     overflow-wrap: anywhere;
   }
-  /* expanded card: spans the grid, the details row below is merged with it into one block */
-  tbody tr.server-row:has(+ .details-row .panel) {
-    grid-column: 1 / -1;
-    border-color: var(--accent);
-    border-bottom: none;
-    border-radius: var(--radius) var(--radius) 0 0;
-    box-shadow: none;
+  /* expanded record: the card stays in place (highlighted), the details open as a full-width
+     row right under the grid row it belongs to; "dense" lets the following cards fill that row */
+  tbody {
+    grid-auto-flow: row dense;
   }
-  tbody tr.server-row:has(+ .details-row .panel) div.description,
-  tbody tr.server-row:has(+ .details-row .panel) .c-mods {
-    display: none;
+  tbody tr.server-row:has(+ .details-row .panel) {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
   }
   /* a collapsed details row must not take a grid cell (tr is display:block in this layout) */
   tbody tr.details-row:not(:has(.panel)) {
@@ -536,18 +533,16 @@ table tbody tr td.bool-col {
   tbody tr.details-row:has(.panel) {
     display: block;
     grid-column: 1 / -1;
-    margin-top: -14px;
-    padding: 0 16px 16px;
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    border-top: none;
-    border-radius: 0 0 var(--radius) var(--radius);
   }
   tbody tr.details-row td {
     display: block;
     padding: 0;
     border: none;
     background: transparent;
+  }
+  tbody tr.details-row .panel {
+    border-color: var(--accent);
+    background: var(--surface);
   }
 
   /* no description text: only the Details button remains in the cell */

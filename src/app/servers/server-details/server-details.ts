@@ -1,9 +1,23 @@
-import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 
 import {VsMod, VsServer} from '../../../services/servers.service';
 import {ModCard} from './mod-card/mod-card';
 
 const collator = new Intl.Collator();
+
+// Only one server record is expanded at a time: expanding another one collapses the previous.
+const expandedServerIp = signal<string | undefined>(undefined);
 
 // Expandable details of one server: description + basic info on the left, a mini card per mod
 // on the right. Lives in a full-width row right under the server record. The body is only
@@ -17,21 +31,38 @@ const collator = new Intl.Collator();
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServerDetails {
-  server = input.required<VsServer>();
+  // Not `required`: the record's "Details" button reads `opened()` before this input is bound.
+  server = input<VsServer>();
   // The mod pane next to the list shows the details of the picked mod.
   modSelected = output<VsMod>();
 
-  readonly opened = signal(false);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+
+  readonly opened = computed(() => {
+    const ip = this.server()?.serverIP;
+    return ip !== undefined && expandedServerIp() === ip;
+  });
   readonly mods = computed(() =>
-    (this.server().mods ?? []).slice().sort((a, b) => collator.compare(a.id, b.id)),
+    (this.server()?.mods ?? []).slice().sort((a, b) => collator.compare(a.id, b.id)),
   );
 
   toggle() {
-    this.opened.update(value => !value);
+    if (this.opened()) {
+      this.close();
+      return;
+    }
+    expandedServerIp.set(this.server()?.serverIP);
+    // keep the expanded panel visible, e.g. when the previously expanded one above collapsed
+    afterNextRender(() => this.host.nativeElement.scrollIntoView({block: 'nearest'}), {
+      injector: this.injector,
+    });
   }
 
   close() {
-    this.opened.set(false);
+    if (this.opened()) {
+      expandedServerIp.set(undefined);
+    }
   }
 
   // Click anywhere on the server record toggles the details, except on things that have their own action.

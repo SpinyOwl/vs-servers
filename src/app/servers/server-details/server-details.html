@@ -1,5 +1,4 @@
-@if (opened()) {
-  @let s = server();
+@if (opened() && server(); as s) {
   <section class="panel" [attr.aria-label]="'Details of ' + (s.serverName || s.serverIP)">
     <header class="head">
       <a class="join" href="vintagestoryjoin://{{ s.serverIP }}">Join</a>
