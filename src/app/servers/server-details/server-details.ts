@@ -1,58 +1,46 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  computed,
-  input,
-  signal,
-  viewChild,
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 
 import {VsMod, VsServer} from '../../../services/servers.service';
-import {ModPane} from '../mod-pane/mod-pane';
 import {ModCard} from './mod-card/mod-card';
 
 const collator = new Intl.Collator();
 
-// Modal with two columns: description + basic info, and a mini card per mod.
-// The body is only rendered while the dialog is open, so rows with many mods stay cheap.
+// Expandable details of one server: description + basic info on the left, a mini card per mod
+// on the right. Lives in a full-width row right under the server record. The body is only
+// rendered while expanded, so rows with many mods stay cheap.
 @Component({
   selector: 'app-server-details',
   standalone: true,
-  imports: [ModCard, ModPane],
+  imports: [ModCard],
   templateUrl: './server-details.html',
   styleUrl: './server-details.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServerDetails {
   server = input.required<VsServer>();
-
-  private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
-  private readonly infoColumn = viewChild<ElementRef<HTMLElement>>('infoColumn');
+  // The mod pane next to the list shows the details of the picked mod.
+  modSelected = output<VsMod>();
 
   readonly opened = signal(false);
-  // Mod whose details replace the description in the left column; the dialog stays open.
-  readonly selectedMod = signal<VsMod | null>(null);
   readonly mods = computed(() =>
     (this.server().mods ?? []).slice().sort((a, b) => collator.compare(a.id, b.id)),
   );
 
-  open() {
-    this.opened.set(true);
-    this.dialog().nativeElement.showModal();
+  toggle() {
+    this.opened.update(value => !value);
   }
 
   close() {
-    this.dialog().nativeElement.close();
+    this.opened.set(false);
   }
 
-  // Click anywhere on the server row opens the dialog, except on things that have their own action.
+  // Click anywhere on the server record toggles the details, except on things that have their own action.
   onRowClick(event: MouseEvent) {
     const target = event.target;
     if (!(target instanceof Element)) {
       return;
     }
-    if (target.closest('a, button, input, select, textarea, dialog')) {
+    if (target.closest('a, button, input, select, textarea')) {
       return;
     }
     // a click on a scrollbar (e.g. the mods list) is not a click on the row
@@ -65,23 +53,6 @@ export class ServerDetails {
     if (target.ownerDocument.getSelection()?.toString()) {
       return;
     }
-    this.open();
-  }
-
-  onBackdropClick(event: MouseEvent) {
-    if (event.target === this.dialog().nativeElement) {
-      this.close();
-    }
-  }
-
-  onClosed() {
-    this.opened.set(false);
-    this.selectedMod.set(null);
-  }
-
-  selectMod(mod: VsMod) {
-    this.selectedMod.set(mod);
-    // on narrow screens the columns are stacked, bring the details into view
-    this.infoColumn()?.nativeElement.scrollIntoView({block: 'nearest'});
+    this.toggle();
   }
 }

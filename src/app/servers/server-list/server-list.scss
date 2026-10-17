@@ -71,6 +71,26 @@ tbody tr:hover td {
   cursor: pointer;
 }
 
+/* expandable details: a full-width row right under the record, only present while expanded */
+.details-row {
+  display: none;
+}
+.details-row:has(.panel) {
+  display: table-row;
+}
+tbody tr.details-row td {
+  padding: 0 var(--cell-pad) var(--cell-pad);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+tbody tr.details-row:hover td {
+  background: var(--surface);
+}
+tbody tr.server-row:has(+ .details-row .panel) td {
+  background: var(--surface-hover);
+  border-bottom-color: transparent;
+}
+
 .empty {
   text-align: center;
   color: var(--text-muted);
@@ -261,7 +281,7 @@ table tbody tr td.bool-col {
     border-bottom: 2px solid var(--border);
   }
 
-  tbody tr:nth-child(even) td {
+  tbody tr:nth-child(4n + 3) td {
     background: color-mix(in srgb, var(--surface-2) 45%, transparent);
   }
 
@@ -269,7 +289,7 @@ table tbody tr td.bool-col {
     background: var(--surface-hover);
   }
 
-  tbody tr:hover td:first-child {
+  tbody tr.server-row:hover td:first-child {
     box-shadow: inset 3px 0 0 var(--accent);
   }
 
@@ -405,7 +425,7 @@ table tbody tr td.bool-col {
     gap: 14px;
     align-items: stretch;
   }
-  tbody tr {
+  tbody tr.server-row {
     display: grid;
     grid-template-columns: 1fr auto auto;
     grid-template-rows: auto auto 1fr auto;
@@ -422,7 +442,7 @@ table tbody tr td.bool-col {
       border-color 0.15s,
       box-shadow 0.15s;
   }
-  tbody tr:hover {
+  tbody tr.server-row:hover {
     border-color: var(--accent);
     box-shadow: 0 0 0 1px var(--accent);
   }
@@ -430,8 +450,8 @@ table tbody tr td.bool-col {
     display: block;
     grid-column: 1 / -1;
   }
-  tbody td,
-  tbody tr:hover td {
+  tbody tr.server-row td,
+  tbody tr.server-row:hover td {
     display: block;
     padding: 0;
     border: none;
@@ -497,6 +517,35 @@ table tbody tr td.bool-col {
     white-space: pre-line;
     overflow-wrap: anywhere;
   }
+  /* expanded card: spans the grid, the details row below is merged with it into one block */
+  tbody tr.server-row:has(+ .details-row .panel) {
+    grid-column: 1 / -1;
+    border-color: var(--accent);
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: none;
+  }
+  tbody tr.server-row:has(+ .details-row .panel) .description,
+  tbody tr.server-row:has(+ .details-row .panel) .c-mods {
+    display: none;
+  }
+  tbody tr.details-row:has(.panel) {
+    display: block;
+    grid-column: 1 / -1;
+    margin-top: -14px;
+    padding: 0 16px 16px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  tbody tr.details-row td {
+    display: block;
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+
   /* no description text: only the Details button remains in the cell */
   .description:empty {
     display: none;
@@ -522,8 +571,6 @@ table tbody tr td.bool-col {
     width: auto;
     color: var(--text-muted);
     text-align: left;
-  }
-  tbody tr {
   }
   tbody tr td.c-pw,
   tbody tr td.c-wl {
@@ -556,7 +603,7 @@ table tbody tr td.bool-col {
       padding: 10px;
       grid-template-columns: 1fr 1fr;
     }
-    tbody tr {
+    tbody tr.server-row {
       padding: 14px;
     }
     .pagination .count {

@@ -1,57 +1,42 @@
-<dialog
-  #dialog
-  class="dialog"
-  [attr.aria-label]="'Details of ' + (server().serverName || server().serverIP)"
-  (click)="onBackdropClick($event)"
-  (close)="onClosed()"
->
-  @if (opened()) {
-    @let s = server();
+@if (opened()) {
+  @let s = server();
+  <section class="panel" [attr.aria-label]="'Details of ' + (s.serverName || s.serverIP)">
     <header class="head">
-      <strong class="name">{{ s.serverName || s.serverIP }}</strong>
       <a class="join" href="vintagestoryjoin://{{ s.serverIP }}">Join</a>
       <button type="button" class="close" (click)="close()">Close</button>
     </header>
 
     <div class="columns">
-      <section #infoColumn class="col info" aria-label="Server info">
-        @if (selectedMod(); as mod) {
-          <app-mod-pane [mod]="mod" (close)="selectedMod.set(null)"></app-mod-pane>
+      <section class="col info" aria-label="Server info">
+        @if (s.gameDescription) {
+          <div class="description" [innerHTML]="s.gameDescription"></div>
         } @else {
-          @if (s.gameDescription) {
-            <div class="description" [innerHTML]="s.gameDescription"></div>
-          } @else {
-            <p class="muted">No description.</p>
-          }
-
-          <dl class="facts">
-            <dt>Address</dt>
-            <dd>{{ s.serverIP }}</dd>
-            <dt>Players</dt>
-            <dd>{{ s.players ?? '—' }} / {{ s.maxPlayers ?? '—' }}</dd>
-            <dt>Game version</dt>
-            <dd>{{ s.gameVersion || '—' }}</dd>
-            <dt>Password</dt>
-            <dd>{{ s.hasPassword ? 'Required' : 'No' }}</dd>
-            <dt>Whitelist</dt>
-            <dd>{{ s.whitelisted ? 'Yes' : 'No' }}</dd>
-            <dt>Mods</dt>
-            <dd>{{ mods().length }}</dd>
-          </dl>
+          <p class="muted">No description.</p>
         }
+
+        <dl class="facts">
+          <dt>Address</dt>
+          <dd>{{ s.serverIP }}</dd>
+          <dt>Players</dt>
+          <dd>{{ s.players ?? '—' }} / {{ s.maxPlayers ?? '—' }}</dd>
+          <dt>Game version</dt>
+          <dd>{{ s.gameVersion || '—' }}</dd>
+          <dt>Password</dt>
+          <dd>{{ s.hasPassword ? 'Required' : 'No' }}</dd>
+          <dt>Whitelist</dt>
+          <dd>{{ s.whitelisted ? 'Yes' : 'No' }}</dd>
+          <dt>Mods</dt>
+          <dd>{{ mods().length }}</dd>
+        </dl>
       </section>
 
       <section class="col mods" aria-label="Mods">
         @for (m of mods(); track m.id) {
-          <app-mod-card
-            [mod]="m"
-            [selected]="selectedMod()?.id === m.id"
-            (view)="selectMod($event)"
-          ></app-mod-card>
+          <app-mod-card [mod]="m" (view)="modSelected.emit($event)"></app-mod-card>
         } @empty {
           <p class="muted">No mods.</p>
         }
       </section>
     </div>
-  }
-</dialog>
+  </section>
+}
