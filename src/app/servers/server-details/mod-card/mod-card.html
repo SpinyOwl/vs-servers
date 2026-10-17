@@ -1,4 +1,10 @@
-<button type="button" class="mod-card" (click)="view.emit(mod())">
+<button
+  type="button"
+  class="mod-card"
+  [class.selected]="selected()"
+  [attr.aria-pressed]="selected()"
+  (click)="view.emit(mod())"
+>
   @if (card().logoUrl; as logo) {
     <img class="logo" [src]="logo" alt="" loading="lazy" />
   } @else {

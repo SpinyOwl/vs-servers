@@ -4,12 +4,12 @@ import {
   ElementRef,
   computed,
   input,
-  output,
   signal,
   viewChild,
 } from '@angular/core';
 
 import {VsMod, VsServer} from '../../../services/servers.service';
+import {ModPane} from '../mod-pane/mod-pane';
 import {ModCard} from './mod-card/mod-card';
 
 const collator = new Intl.Collator();
@@ -19,18 +19,20 @@ const collator = new Intl.Collator();
 @Component({
   selector: 'app-server-details',
   standalone: true,
-  imports: [ModCard],
+  imports: [ModCard, ModPane],
   templateUrl: './server-details.html',
   styleUrl: './server-details.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServerDetails {
   server = input.required<VsServer>();
-  modSelected = output<VsMod>();
 
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
+  private readonly infoColumn = viewChild<ElementRef<HTMLElement>>('infoColumn');
 
   readonly opened = signal(false);
+  // Mod whose details replace the description in the left column; the dialog stays open.
+  readonly selectedMod = signal<VsMod | null>(null);
   readonly mods = computed(() =>
     (this.server().mods ?? []).slice().sort((a, b) => collator.compare(a.id, b.id)),
   );
@@ -72,8 +74,14 @@ export class ServerDetails {
     }
   }
 
+  onClosed() {
+    this.opened.set(false);
+    this.selectedMod.set(null);
+  }
+
   selectMod(mod: VsMod) {
-    this.close();
-    this.modSelected.emit(mod);
+    this.selectedMod.set(mod);
+    // on narrow screens the columns are stacked, bring the details into view
+    this.infoColumn()?.nativeElement.scrollIntoView({block: 'nearest'});
   }
 }

@@ -134,11 +134,7 @@
                 }
               </div>
               <button type="button" class="desc-toggle" (click)="details.open()">Details</button>
-              <app-server-details
-                #details
-                [server]="s"
-                (modSelected)="modSelected.emit($event)"
-              ></app-server-details>
+              <app-server-details #details [server]="s"></app-server-details>
             </div>
           </td>
           <td class="c-mods" data-label="Mods">

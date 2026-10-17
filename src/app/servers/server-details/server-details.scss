@@ -70,6 +70,12 @@
   border-right: 1px solid var(--border);
 }
 
+/* embedded mod details fill the column instead of acting as a page sidebar */
+.info app-mod-pane {
+  display: block;
+  height: 100%;
+}
+
 .mods {
   display: flex;
   flex-direction: column;

@@ -16,6 +16,7 @@ import {environment} from '../../../../environments/environment';
 })
 export class ModCard {
   mod = input.required<VsMod>();
+  selected = input(false);
   view = output<VsMod>();
 
   private readonly modsService = inject(ModsService);
