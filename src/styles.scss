@@ -1,7 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 /*
  * Tokens. Two independent switches on <html> (set by the inline script in index.html, changed in header.ts):
- *   data-design = classic | a | b   -> layout: original table, compact table, cards
+ *   data-design = a | b             -> layout: compact table, cards
  *   data-theme  = classic | dark | light -> palette (classic = the original brown look)
  */
 :root {

@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-type Design = 'classic' | 'a' | 'b';
+type Design = 'a' | 'b';
 type Theme = 'classic' | 'dark' | 'light';
 const THEMES: Theme[] = ['classic', 'dark', 'light'];
 
@@ -16,7 +16,6 @@ const root = document.documentElement;
 })
 export class Header {
   readonly designs: { id: Design; label: string; title: string }[] = [
-    { id: 'classic', label: 'Original', title: 'Original table layout' },
     { id: 'a', label: 'Compact', title: 'Dense table' },
     { id: 'b', label: 'Cards', title: 'Responsive cards' },
   ];

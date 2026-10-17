@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <script>
-    // Pick design (classic|a|b) and theme (classic|dark|light) before first paint: ?design=b&theme=classic, else saved choice.
+    // Pick design (a|b) and theme (classic|dark|light) before first paint: ?design=b&theme=classic, else saved choice.
     (function () {
       var d = document.documentElement, q = new URLSearchParams(location.search);
       function pick(key, allowed, fallback) {
@@ -11,7 +11,7 @@
         try { if (allowed.indexOf(v) < 0) v = localStorage.getItem('vs-' + key); } catch (e) {}
         return allowed.indexOf(v) < 0 ? fallback : v;
       }
-      var design = pick('design', ['classic', 'a', 'b'], 'a');
+      var design = pick('design', ['a', 'b'], 'a');
       var theme = pick('theme', ['classic', 'dark', 'light'], 'classic');
       d.setAttribute('data-design', design);
       d.setAttribute('data-theme', theme);
