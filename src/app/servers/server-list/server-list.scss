@@ -209,6 +209,42 @@ table tbody tr td.bool-col {
   display: none;
 }
 
+/* "Show more / less" toggle: only the clamped layouts (A, B) use it */
+.desc-toggle {
+  display: none;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--link);
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.desc-toggle::after {
+  content: 'Show more';
+}
+.desc-toggle:hover {
+  text-decoration: underline;
+}
+:host-context([data-design='a']) .desc-toggle,
+:host-context([data-design='b']) .desc-toggle {
+  display: inline-block;
+}
+.desc-wrap.expanded {
+  .desc-toggle::after {
+    content: 'Show less';
+  }
+  .description {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+
 /* =============== Variant A: compact dark table =============== */
 :host-context([data-design='a']) {
   .pagination {
