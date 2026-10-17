@@ -53,10 +53,18 @@ export class ServerDetails {
       return;
     }
     expandedServerIp.set(this.server()?.serverIP);
-    // keep the expanded panel visible, e.g. when the previously expanded one above collapsed
-    afterNextRender(() => this.host.nativeElement.scrollIntoView({block: 'nearest'}), {
-      injector: this.injector,
-    });
+    // bring the expanded panel fully into view (with a margin, see scroll-margin in the styles);
+    // also covers the layout shift when the previously expanded record above collapses
+    afterNextRender(
+      () => {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.host.nativeElement.scrollIntoView({
+          block: 'nearest',
+          behavior: reduceMotion ? 'auto' : 'smooth',
+        });
+      },
+      {injector: this.injector},
+    );
   }
 
   close() {

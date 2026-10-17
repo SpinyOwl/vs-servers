@@ -1,5 +1,7 @@
 :host {
   display: block;
+  /* breathing room when the panel is scrolled into view */
+  scroll-margin: 16px;
 }
 
 .panel {
