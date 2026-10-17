@@ -117,7 +117,7 @@
     </thead>
     <tbody>
       @for (s of paged(); track s.serverIP) {
-        <tr>
+        <tr class="server-row" (click)="details.onRowClick($event)">
           <td class="c-name" data-label="Server">
             <div class="server-name">
               {{ s.serverName || '—' }}

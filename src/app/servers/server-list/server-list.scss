@@ -67,6 +67,10 @@ tbody tr:hover td {
   background: var(--surface-hover);
 }
 
+.server-row {
+  cursor: pointer;
+}
+
 .empty {
   text-align: center;
   color: var(--text-muted);

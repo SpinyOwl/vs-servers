@@ -44,6 +44,28 @@ export class ServerDetails {
     this.dialog().nativeElement.close();
   }
 
+  // Click anywhere on the server row opens the dialog, except on things that have their own action.
+  onRowClick(event: MouseEvent) {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+    if (target.closest('a, button, input, select, textarea, dialog')) {
+      return;
+    }
+    // a click on a scrollbar (e.g. the mods list) is not a click on the row
+    if (target instanceof HTMLElement && target.clientWidth < target.offsetWidth) {
+      if (event.offsetX >= target.clientWidth) {
+        return;
+      }
+    }
+    // the user is selecting text (e.g. to copy the server name)
+    if (target.ownerDocument.getSelection()?.toString()) {
+      return;
+    }
+    this.open();
+  }
+
   onBackdropClick(event: MouseEvent) {
     if (event.target === this.dialog().nativeElement) {
       this.close();
