@@ -529,6 +529,10 @@ table tbody tr td.bool-col {
   tbody tr.server-row:has(+ .details-row .panel) .c-mods {
     display: none;
   }
+  /* a collapsed details row must not take a grid cell (tr is display:block in this layout) */
+  tbody tr.details-row:not(:has(.panel)) {
+    display: none;
+  }
   tbody tr.details-row:has(.panel) {
     display: block;
     grid-column: 1 / -1;
