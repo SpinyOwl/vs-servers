@@ -151,7 +151,7 @@ tbody tr.server-row:has(+ .details-row .panel) td {
   font-weight: 400;
 }
 
-.description {
+div.description {
   min-width: 200px;
   max-width: 400px;
 }
@@ -301,7 +301,7 @@ table tbody tr td.bool-col {
     font-weight: 600;
   }
 
-  .description {
+  div.description {
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
@@ -506,7 +506,7 @@ table tbody tr td.bool-col {
     border-radius: 8px;
     color: var(--accent);
   }
-  .description {
+  div.description {
     min-width: 0;
     max-width: none;
     display: -webkit-box;
@@ -525,7 +525,7 @@ table tbody tr td.bool-col {
     border-radius: var(--radius) var(--radius) 0 0;
     box-shadow: none;
   }
-  tbody tr.server-row:has(+ .details-row .panel) .description,
+  tbody tr.server-row:has(+ .details-row .panel) div.description,
   tbody tr.server-row:has(+ .details-row .panel) .c-mods {
     display: none;
   }
@@ -547,7 +547,7 @@ table tbody tr td.bool-col {
   }
 
   /* no description text: only the Details button remains in the cell */
-  .description:empty {
+  div.description:empty {
     display: none;
   }
 
