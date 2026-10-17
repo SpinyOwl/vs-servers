@@ -215,8 +215,13 @@ table tbody tr td.bool-col {
   }
 
   .description {
-    max-height: 3.9em;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
     color: var(--text-muted);
   }
 
@@ -442,6 +447,12 @@ table tbody tr td.bool-col {
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  /* no description: drop the cell so it does not leave an empty row gap */
+  .c-desc:has(.description:empty) {
+    display: none;
   }
 
   .chip {
