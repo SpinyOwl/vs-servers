@@ -127,23 +127,30 @@
             </div>
           </td>
           <td class="c-desc" data-label="Description">
-            <div class="desc-wrap" #wrap>
+            <div class="desc-wrap">
               <div class="description">
                 @if (s.gameDescription) {
                   <div [innerHTML]="s.gameDescription"></div>
                 }
               </div>
               @if (s.gameDescription && s.gameDescription.length > 100) {
-                <button
-                  type="button"
-                  class="desc-toggle"
-                  #toggle
-                  aria-expanded="false"
-                  (click)="
-                    wrap.classList.toggle('expanded');
-                    toggle.setAttribute('aria-expanded', wrap.classList.contains('expanded') + '')
-                  "
-                ></button>
+                <button type="button" class="desc-toggle" (click)="descDialog.showModal()">
+                  Read more
+                </button>
+                <dialog
+                  #descDialog
+                  class="desc-dialog"
+                  [attr.aria-label]="'Description of ' + (s.serverName || s.serverIP)"
+                  (click)="$event.target === descDialog && descDialog.close()"
+                >
+                  <div class="desc-dialog-head">
+                    <strong>{{ s.serverName || s.serverIP }}</strong>
+                    <button type="button" class="desc-dialog-close" (click)="descDialog.close()">
+                      Close
+                    </button>
+                  </div>
+                  <div class="desc-dialog-body" [innerHTML]="s.gameDescription"></div>
+                </dialog>
               }
             </div>
           </td>
