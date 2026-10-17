@@ -49,6 +49,17 @@
   overflow-wrap: anywhere;
 }
 
+/* the id is what the chips show and what the list is sorted by */
+.modid {
+  align-self: flex-start;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--chip-name-bg);
+  color: var(--chip-name-fg);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
 .meta,
 .stats {
   color: var(--text-muted);
